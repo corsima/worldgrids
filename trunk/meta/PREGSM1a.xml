@@ -14,13 +14,12 @@
 <pubinfo>
 <pubplace>Wageningen</pubplace>
 </pubinfo>
-<othercit>Other information required to complete the citation.</othercit>
 <onlink>http://www.worldgrids.org</onlink>
 </citeinfo>
 </citation>
 <descript>
-<abstract>Total annual precipitation estimated based on the GSMaP and WorldClim at 6/120 arcdegrees.</abstract>
-<purpose>Intended use: global soil mapping, species distribution modelling, environmental modelling</purpose>
+<abstract>Total annual precipitation estimated as an average between the GSMaP monthly rainfall and WorldClim Bioclim12 data set at 6/120 arcdegrees. GSMaP monthly rainfall data produced by Japan Aerospace Exploration Agency JAXA (http://sharaku.eorc.jaxa.jp/GSMaP_crest/) is explained in detail in: "Kubota, T., Shige, S., Hashizume, H., Aonashi, K., Takahashi, N., Seto, S., Hirose, M., Takayabu, Y. N., Nakagawa, K., Iwanami, K., Ushio, T., Kachi, M., and Okamoto, K., 2007. Global Precipitation Map using Satelliteborne Microwave Radiometers by the GSMaP Project: Production and Validation. IEEE Trans. Geosci. Remote Sens., 45(7), 2259-2275". WorldClim precipitation data (http://biogeo.berkeley.edu/worldclim1_4/grid/cur/bio_2-5m_bil.zip) is explained in detail in: "Hijmans, R.J., S.E. Cameron, J.L. Parra, P.G. Jones and A. Jarvis, 2005. Very high resolution interpolated climate surfaces for global land areas. International Journal of Climatology 25:1965-1978.".</abstract>
+<purpose>Intended use: (multipurpose) global soil mapping and monitoring, species distribution modelling, environmental modelling.</purpose>
 </descript>
 <timeperd>
 <timeinfo>
@@ -55,142 +54,115 @@
 </keywords>
 <ptcontac></ptcontac>
 <browse>
-<browsen>Name of a related graphic file that provides an illustration of the data set.</browsen>
+<browsen>http://www.worldgrids.org/img/PREGSM1a.png</browsen>
 <browsed>Preview</browsed>
 <browset>"PNG" Portable Network Graphics</browset>
 </browse>
-<datacred>??</datacred>
-<native>Software and version (operating system and version), platform</native>
+<native>Windows 7 x64, build 7601, Service Pack 1, 8GB RAM</native>
 </idinfo>
 <dataqual>
 <attracc>
 <attraccr>The image shows artificial lines at some places because the GSMaP imagery is based on mosaicked data.</attraccr>
 </attracc>
-<complete>The processing steps and possible problems are indicated in the attached R script. See the Google code project.</complete>
+<complete>The processing steps and possible problems are indicated in the attached R script. See the Google code project at https://code.google.com/p/worldgrids/ for more details.</complete>
 <posacc>
 <horizpa>
-<horizpar>An explanation of the accuracy of the horizontal coordinate measurements and a description of the tests used.</horizpar>
+<horizpar>Horizontal accuracy between 1-10 km</horizpar>
 </horizpa>
-<vertacc>
-<vertaccr>An explanation of the accuracy of the vertical coordinate measurements and a description of the tests used.</vertaccr>
-</vertacc>
 </posacc>
 <lineage>
 <srcinfo>
 <srccite>
 <citeinfo>
-<onlink>URL of a script that can reproduce this data.</onlink>
+<onlink>https://code.google.com/p/worldgrids/source/browse/trunk/GSMaP/getGSMaP.R</onlink>
 </citeinfo>
 </srccite>
-<srcscale>The scale denominator of the representative fraction on a map.</srcscale>
+<srcscale>10M</srcscale>
 <typesrc>"online"</typesrc>
 <srctime>
 <timeinfo>
 <sngdate>
-<caldate>The year (and optionally month, or month and day).</caldate>
+<caldate>2003-2006</caldate>
 </sngdate>
 </timeinfo>
-<srccurr>The basis on which the source time period of content information of the source data set is determined.</srccurr>
+<srccurr>Source of the satellite imagery</srccurr>
 </srctime>
-<srccitea>Short-form alias for the source citation.</srccitea>
-<srccontr>Brief statement identifying the information contributed by the source to the data set.</srccontr>
+<srccitea>PREGSM</srccitea>
+<srccontr>JAXA/EORC offers hourly global rainfall maps in near real time (about four hours after observation) using algorithms developed by the GSMaP Project.</srccontr>
 </srcinfo>
-<procstep>
-<procdesc>An explanation of the event and related parameters or tolerances.</procdesc>
-<procdate>The date when the event was completed.</procdate>
-</procstep>
 </lineage>
 </dataqual>
 <spdoinfo>
-<indspref>Name of types of geographic features, addressing schemes, or other means through which locations are referenced in the data set.</indspref>
+<indspref>Global data sets</indspref>
 <direct>"Raster"</direct>
-<ptvctinf>
-<sdtsterm>
-<sdtstype>"Point", "Entity point", "Label point", "Area point", "Node, planar graph", "Node, network", "String", "Link", "Complete chain", "Area chain", "Network chain, planar graph", "Network chain, nonplanar graph", "Circular arc, three point center",	"Elliptical arc", "Uniform B-spline", "Piecewise Bezier", "Ring with mixed composition", "Ring composed of strings", "Ring composed of chains", "Ring composed of arcs", "G-polygon", "GT-polygon composed of rings", "GT-polygon composed of chains", "Universe polygon composed of rings", "Universe polygon composed of chains", "Void polygon composed of rings", "Void polygon composed of chains"</sdtstype>
-<ptvctcnt>The total number of the point or vector object type occurring in the data set.</ptvctcnt>
-</sdtsterm>
-</ptvctinf>
 </spdoinfo>
 <spref>
 <horizsys>
 <geograph>
-<latres>The minimum difference between two adjacent latitude values expressed in Geographic Coordinate Units of measure.</latres>
-<longres>The minimum difference between two adjacent longitude values expressed in Geographic Coordinate Units of measure.</longres>
+<latres>3600</latres>
+<longres>7200</longres>
 <geogunit>"Decimal degrees"</geogunit>
 </geograph>
 <geodetic>
-<horizdn>Horizontal datum EPSG Geodetic Parameter Registry name e.g. "North American Datum of 1927"</horizdn>
-<ellips>Ellipsoid EPSG Geodetic Parameter Registry name e.g. "Geodetic Reference System 80"</ellips>
-<semiaxis>Radius of the equatorial axis of the ellipsoid.</semiaxis>
-<denflat>The denominator of the ratio of the difference between the equatorial and polar radii of the ellipsoid when the numerator is set to 1.</denflat>
+<horizdn>"World Geodetic System 1984"</horizdn>
+<ellips>"World Geodetic System 1984"</ellips>
 </geodetic>
 </horizsys>
 </spref>
 <eainfo>
 <detailed>
-<enttyp>
-<enttypl>The name of the entity type.</enttypl>
-<enttypd>The description of the entity type.</enttypd>
-</enttyp>
 <attr>
-<attrlabl>The name of the attribute.</attrlabl>
-<attrdef>The description of the attribute.</attrdef>
+<attrlabl>PRE</attrlabl>
+<attrdef>Total annual precipitation (long-term)</attrdef>
 <attrdomv>
 <rdom>
-<rdommin>The least value that the attribute can be assigned.</rdommin>
-<rdommax>The greatest value that the attribute can be assigned.</rdommax>
-<attrunit>The standard of measurement for an attribute value.</attrunit>
-<attrmres>The smallest unit increment to which an attribute value is measured.</attrmres>
+<rdommin>0</rdommin>
+<rdommax>10577</rdommax>
+<attrunit>mm of water</attrunit>
+<attrmres>1</attrmres>
 </rdom>
 </attrdomv>
-<begdatea>Earliest or only date for which the attribute values are current.</begdatea>
-<enddatea>Latest date for which the information are current.</enddatea>
+<begdatea>1960</begdatea>
+<enddatea>2006</enddatea>
 <attrvai>
-<attrva>An estimate of the accuracy of the assignment of attribute values.</attrva>
-<attrvae>The definition of the Attribute Value Accuracy measure and units, and a description of how the estimate was derived.</attrvae>
+<attrva>15</attrva>
+<attrvae>RMSE (estimated)</attrvae>
 </attrvai>
-<attrmfrq>"As needed", "Irregular", "None planned"</attrmfrq>
+<attrmfrq>"None planned"</attrmfrq>
 </attr>
 </detailed>
-<overview>
-<eaover>Detailed summary of the information contained in a data set.</eaover>
-<eadetcit>Reference to the complete description of the entity types, attributes, and attribute values for the data set.</eadetcit>
-</overview>
 </eainfo>
 <distinfo>
 <distrib>
-<resdesc>The identifier by which the distributor knows the data set.</resdesc>
-<distliab>Statement of the liability assumed by the distributor.</distliab>
+<resdesc>PREGSM1a</resdesc>
+<distliab>http://worldgrids.org/doku.php?id=wiki:contact</distliab>
 <cntinfo>
 <cntorgp>
-<cntorg>The name of the organization that distributes the data.</cntorg>
+<cntorg>ISRIC - World Soil Information</cntorg>
 </cntorgp>
 </cntinfo>
 </distrib>
 <stdorder>
 <digform>
 <digtinfo>
-<formname>GDAL driver name</formname>
-<formvern>Version number of the format.</formvern>
-<formcont>Description of the content of the data encoded in a format.</formcont>
-<filedec>"ZIP","RAR","No compression applied"</filedec>
-<transize>The size, or estimated size, of the transferred data set in megabytes.</transize>
+<formname>GTiff</formname>
+<filedec>"GZIP"</filedec>
+<transize>13.2MB</transize>
 </digtinfo>
 <digtopt>
 <onlinopt>
 <computer>
 <networka>
-<networkr>The name of the file or service from which the data set can be obtained.</networkr>
+<networkr>http://www.worlgrids.org/maps/PREGSM1a.tif.gz</networkr>
 </networka>
 </computer>
 </onlinopt>
 </digtopt>
 </digform>
-<fees>The fees and terms for retrieving the data set.</fees>
 </stdorder>
 </distinfo>
 <metainfo>
-<metd>The date that the metadata were created or last updated.</metd>
+<metd>2012-06-01</metd>
 <metc>
 <cntinfo>
 <cntperp>
@@ -198,12 +170,11 @@
 <cntorg>ISRIC - World Soil Information</cntorg>
 </cntperp>
 <cntaddr>
-<addrtype>The information provided by the address.</addrtype>
-<address>An address line for the address.</address>
-<city>The city of the address.</city>
-<state>The state or province of the address.</state>
-<postal>The ZIP or other postal code of the address.</postal>
-<country>The country of the address.</country>
+<addrtype>Mailing address</addrtype>
+<address>Postbus 353</address>
+<city>Wageningen</city>
+<postal>6700AJ</postal>
+<country>The Netherlands</country>
 </cntaddr>
 </cntinfo>
 </metc>

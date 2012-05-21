@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+<idinfo>
+<citation>
+<citeinfo>
+<origin>JRC European Commission</origin>
+<pubdate>2010</pubdate>
+<title>Global Land Cover 2000</title>
+<geoform>"raster digital data"</geoform>
+<serinfo>
+<sername>Global Environment Monitoring Unit</sername>
+</serinfo>
+<pubinfo>
+<pubplace>Ispra, Italy</pubplace>
+</pubinfo>
+<onlink>http://bioval.jrc.ec.europa.eu/products/glc2000/glc2000.php</onlink>
+</citeinfo>
+</citation>
+<descript>
+<abstract>Global Land Cover 2000 resampled to 6/120 arcdegrees using GDAL utilities. The original map can be obtained from http://bioval.jrc.ec.europa.eu/products/glc2000/glc2000.php. The methodology is explained in detail in: "Fritz, S. et al. 2003. Harmonisation, mosaicing and production of the Global Land Cover 2000 database. JRC report EUR 20849 EN, Luxembourg, 41 p."</abstract>
+<purpose>Intended use: (multipurpose) global soil mapping and monitoring, species distribution modelling, environmental modelling.</purpose>
+</descript>
+<timeperd>
+<timeinfo>
+<rngdates>
+<begdate>1999-01-01</begdate>
+<enddate>2000-12-31</enddate>
+</rngdates>
+</timeinfo>
+<current>"ground condition"</current>
+</timeperd>
+<status>
+<progress>"Complete"</progress>
+<update>"None planned"</update>
+</status>
+<spdom>
+<bounding>
+<westbc>-180</westbc>
+<eastbc>180</eastbc>
+<northbc>90</northbc>
+<southbc>90</southbc>
+</bounding>
+</spdom>
+<keywords>
+<theme>
+<themekt>Global data sets</themekt>
+<themekey>climate</themekey>
+</theme>
+<place>
+<placekt>Publicly available global datasets</placekt>
+<placekey>***</placekey>
+</place>
+</keywords>
+<ptcontac></ptcontac>
+<browse>
+<browsen>http://www.worldgrids.org/img/GLCJRC1aa.png</browsen>
+<browsed>Preview</browsed>
+<browset>"PNG" Portable Network Graphics</browset>
+</browse>
+<native>Windows 7 x64, build 7601, Service Pack 1, 8GB RAM</native>
+</idinfo>
+<dataqual>
+<attracc>
+<attraccr>The accuracy of the map has not been reported on the website, but is possibly addressed in some of the numerous literature published on the topic. See: http://bioval.jrc.ec.europa.eu/products/glc2000/publications.php</attraccr>
+</attracc>
+<complete>The processing steps and possible problems are indicated in the attached R script. See the Google code project at https://code.google.com/p/worldgrids/ for more details.</complete>
+<posacc>
+<horizpa>
+<horizpar>Horizontal accuracy between 0.5-1 km</horizpar>
+</horizpa>
+</posacc>
+<lineage>
+<srcinfo>
+<srccite>
+<citeinfo>
+<onlink>https://code.google.com/p/worldgrids/source/browse/trunk/GSMaP/getGlobCover.R</onlink>
+</citeinfo>
+</srccite>
+<srcscale>2M</srcscale>
+<typesrc>"online"</typesrc>
+<srctime>
+<timeinfo>
+<sngdate>
+<caldate>1999-2000</caldate>
+</sngdate>
+</timeinfo>
+<srccurr>Satellite imagery collection date</srccurr>
+</srctime>
+<srccitea>GLC2000</srccitea>
+<srccontr>Global Land Cover 2000 Project (GLC 2000) is a product of the Global vegetation Monitoring Unit and numerous collaborators. GLC 2000 is based on the VEGA 2000 datase (14 months of pre-processed daily global data acquired by the VEGETATION instrument on board the SPOT 4 satellite). </srccontr>
+</srcinfo>
+</lineage>
+</dataqual>
+<spdoinfo>
+<indspref>Global data sets</indspref>
+<direct>"Raster"</direct>
+</spdoinfo>
+<spref>
+<horizsys>
+<geograph>
+<latres>3600</latres>
+<longres>7200</longres>
+<geogunit>"Decimal degrees"</geogunit>
+</geograph>
+<geodetic>
+<horizdn>"World Geodetic System 1984"</horizdn>
+<ellips>"World Geodetic System 1984"</ellips>
+</geodetic>
+</horizsys>
+</spref>
+<eainfo>
+<detailed>
+<attr>
+<attrlabl>GLCJRC1</attrlabl> 
+<attrdef>Land Cover Class Code Value.</attrdef> 
+<attrdefs>GLC 200 Legend Land Cover Class Descriptions</attrdefs> 
+<attrdomv>
+<edom>
+<edomv>1</edomv> 
+<edomvd>Tree Cover, broadleaved, evergreen</edomvd> 
+</edom>
+</attrdomv>
+<attrdomv>
+<edom>
+<edomv>2</edomv> 
+<edomvd>Tree Cover, broadleaved, deciduous, closed</edomvd> 
+</edom>
+</attrdomv>
+<attrdomv>
+<edom>
+<edomv>3</edomv> 
+<edomvd>Tree Cover, broadleaved, deciduous, open</edomvd> 
+</edom>
+</attrdomv>
+<attrdomv>
+<edom>
+<edomv>4</edomv> 
+<edomvd>Tree Cover, needle-leaved, evergreen</edomvd> 
+</edom>
+</attrdomv>
+<attrdomv>
+<edom>
+<edomv>5</edomv> 
+<edomvd>Tree Cover, needle-leaved, deciduous</edomvd> 
+</edom>
+</attrdomv>
+<attrdomv>
+<edom>
+<edomv>6</edomv> 
+<edomvd>Tree Cover, mixed leaf type</edomvd> 
+</edom>
+</attrdomv>
+<attrdomv>
+<edom>
+<edomv>7</edomv> 
+<edomvd>Tree Cover, regularly flooded, fresh water</edomvd> 
+</edom>
+</attrdomv>
+<attrdomv>
+<edom>
+<edomv>8</edomv> 
+<edomvd>Tree Cover, regularly flooded, saline water</edomvd> 
+</edom>
+</attrdomv>
+<attrdomv>
+<edom>
+<edomv>9</edomv> 
+<edomvd>Mosaic: Tree Cover / Other natural vegetation</edomvd> 
+</edom>
+</attrdomv>
+<attrdomv>
+<edom>
+<edomv>10</edomv> 
+<edomvd>Tree Cover, burnt</edomvd> 
+</edom>
+</attrdomv>
+<attrdomv>
+<edom>
+<edomv>11</edomv> 
+<edomvd>Shrub Cover, closed-open, evergreen</edomvd> 
+</edom>
+</attrdomv>
+<attrdomv>
+<edom>
+<edomv>12</edomv> 
+<edomvd>Shrub Cover, closed-open, deciduous</edomvd> 
+</edom>
+</attrdomv>
+<attrdomv>
+<edom>
+<edomv>13</edomv> 
+<edomvd>Herbaceous Cover, closed-open</edomvd> 
+</edom>
+</attrdomv>
+<attrdomv>
+<edom>
+<edomv>14</edomv> 
+<edomvd>Sparse herbaceous or sparse shrub cover</edomvd> 
+</edom>
+</attrdomv>
+<attrdomv>
+<edom>
+<edomv>15</edomv> 
+<edomvd>Regularly flooded shrub and/or herbaceous cover</edomvd> 
+</edom>
+</attrdomv>
+<attrdomv>
+<edom>
+<edomv>16</edomv> 
+<edomvd>Cultivated and managed areas</edomvd> 
+</edom>
+</attrdomv>
+<attrdomv>
+<edom>
+<edomv>17</edomv> 
+<edomvd>Mosaic: Cropland / Tree Cover / Other natural vegetation</edomvd> 
+</edom>
+</attrdomv>
+<attrdomv>
+<edom>
+<edomv>18</edomv> 
+<edomvd>Mosaic: Cropland / Shrub and/or grass cover</edomvd> 
+</edom>
+</attrdomv>
+<attrdomv>
+<edom>
+<edomv>19</edomv> 
+<edomvd>Bare Areas</edomvd> 
+</edom>
+</attrdomv>
+<attrdomv>
+<edom>
+<edomv>20</edomv> 
+<edomvd>Water Bodies</edomvd> 
+</edom>
+</attrdomv>
+<attrdomv>
+<edom>
+<edomv>21</edomv> 
+<edomvd>Snow and Ice</edomvd> 
+</edom>
+</attrdomv>
+<attrdomv>
+<edom>
+<edomv>22</edomv> 
+<edomvd>Artificial surfaces and associated areas</edomvd> 
+</edom>
+</attrdomv>
+<attrdomv>
+<edom>
+<edomv>23</edomv> 
+<edomvd>No data</edomvd> 
+</edom>
+</attrdomv>
+</attr>
+</detailed>
+</eainfo>
+<distinfo>
+<distrib>
+<resdesc>Global Land Cover 2000</resdesc>
+<distliab>http://bioval.jrc.ec.europa.eu/products/glc2000/disclaimer.php</distliab>
+<cntinfo>
+<cntorgp>
+<cntorg>JRC European Commission</cntorg>
+</cntorgp>
+</cntinfo>
+</distrib>
+<stdorder>
+<digform>
+<digtinfo>
+<formname>GTiff</formname>
+<filedec>"GZIP"</filedec>
+<transize>1.5MB</transize>
+</digtinfo>
+<digtopt>
+<onlinopt>
+<computer>
+<networka>
+<networkr>http://www.worlgrids.org/maps/GLCJRC1a.tif.gz</networkr>
+</networka>
+</computer>
+</onlinopt>
+</digtopt>
+</digform>
+</stdorder>
+</distinfo>
+<metainfo>
+<metd>2012-06-01</metd>
+<metc>
+<cntinfo>
+<cntperp>
+<cntper>Tomislav Hengl</cntper>
+<cntorg>ISRIC - World Soil Information</cntorg>
+</cntperp>
+<cntaddr>
+<addrtype>Mailing address</addrtype>
+<address>Postbus 353</address>
+<city>Wageningen</city>
+<postal>6700AJ</postal>
+<country>The Netherlands</country>
+</cntaddr>
+</cntinfo>
+</metc>
+<metstdn>Content Standard for Digital Geospatial Metadata</metstdn>
+<metstdv>FGDC-STD-001-1998</metstdv>
+</metainfo>
+</metadata>

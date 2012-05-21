@@ -14,8 +14,10 @@
 # ------------------------------------
 
 library(rgdal)
-workd <- paste(gsub("/", "\\\\", getwd()), "\\", sep="")
 library(R.utils)
+library(plotKML)
+require(RColorBrewer)
+
 fw.path = utils::readRegistry("SOFTWARE\\WOW6432Node\\FWTools")$Install_Dir
 gdalwarp = shQuote(shortPathName(normalizePath(file.path(fw.path, "bin/gdalwarp.exe"))))
 gdal_translate = shQuote(shortPathName(normalizePath(file.path(fw.path, "bin/gdal_translate.exe"))))
@@ -90,5 +92,35 @@ for(outname in c("PREGSM1a.tif")){
 # Clean-up:
 rm(grids.pnt)
 rm(grids)
+
+# ------------------------------------
+# create the SLD file:
+# ------------------------------------
+
+Format_Information_Content = "GTiff"
+obj.name = "PREGSM1a.tif"
+sld.file = "PREGSM1a.sld"
+Citation_title = "Total annual precipitation"
+ColorMap_type = "intervals"
+opacity = 1
+data(SAGA_pal)
+pal <- colorRamp(SAGA_pal[["SG_COLORS_WHITE_BLUE"]], space = "rgb", interpolate = "linear") 
+bounds <- round(seq(0, 1734.5, length.out=100), 0)
+obj = data.frame(ranks=1:100, color=rgb(pal(scales::rescale(bounds))/ 255))
+
+l1 = newXMLNode("StyledLayerDescriptor", attrs=c(version="1.0.0"), namespaceDefinitions=c("xsi:schemaLocation"="http://www.opengis.net/sld StyledLayerDescriptor.xsd", "sld"="http://www.opengis.net/sld", "ogc"="http://www.opengis.net/ogc", "gml"="http://www.opengis.net/gml"))
+l2 <- newXMLNode("NamedLayer", parent = l1)
+l3 <- newXMLNode("Name", paste(Citation_title, "(", Format_Information_Content, ")", sep=""), parent = l2)
+l3b <- newXMLNode("UserStyle", parent = l2)
+l4 <- newXMLNode("Title", paste(obj.name, "style", sep="_"), parent = l3b)
+l4b <- newXMLNode("FeatureTypeStyle", parent = l3b)
+l5 <- newXMLNode("Rule", parent = l4b)
+l6 <- newXMLNode("RasterSymbolizer", parent = l5)
+l7 <- newXMLNode("ColorMap", attrs=c(type=ColorMap_type), parent = l6)
+txt <- sprintf('<ColorMapEntry color="#%s" quantity="%.2f" label="%s" opacity="%.1f"/>', obj$color, bounds, bounds, rep(opacity, length(obj$color)))
+parseXMLAndAdd(txt, l7)
+saveXML(l1, sld.file)
+
+system(paste("xcopy", sld.file, shortPathName(normalizePath("D:/WORLDGRIDS/sld"))))
 
 # end of script; 

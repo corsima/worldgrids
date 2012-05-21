@@ -15,7 +15,7 @@
 
 library(rgdal)
 library(RSAGA)
-library(gdata)
+library(XML)
 fw.path = utils::readRegistry("SOFTWARE\\WOW6432Node\\FWTools")$Install_Dir
 gdalwarp = shQuote(shortPathName(normalizePath(file.path(fw.path, "bin/gdalwarp.exe"))))
 gdal_translate = shQuote(shortPathName(normalizePath(file.path(fw.path, "bin/gdal_translate.exe"))))
@@ -35,8 +35,11 @@ GDALinfo("GLOBCOVER_200412_200606_V2.2_Global_CLA.tif")
 # Extract maps / classes separately:
 # --------------------------------------
 
+
 class.lst <- read.dbf("GLOBCOVER_200412_200606_V2.2_Global_CLA.tif.vat.dbf")
-perl <- gdata:::findPerl("perl")
+library(gdata)
+# perl <- gdata:::findPerl("perl")
+perl = "C:/Perl64/bin/perl.exe"
 class.names <- read.xls("Globcover_Legend.xls", perl=perl)
 class.names$Label
 
@@ -101,6 +104,38 @@ for(outname in c("GLCJRC1a.tif", "GLCESA3a.tif")){
 # Clean-up:
 unlink("class_*.tif")
 unlink("GLOBCOVER_*.tif")
+
+# ------------------------------------
+# create the SLD file:
+# ------------------------------------
+
+# read the legend:
+glc_leg <- read.xls("Tiff/Global_Legend.xls", perl=perl)
+str(glc_leg)
+Format_Information_Content = "GTiff"
+obj.name = "GLCJRC1a.tif"
+sld.file = "GLCJRC1a.sld"
+Citation_title = "Global Land Cover 2000"
+ColorMap_type = "intervals"
+pal <- rgb(red=glc_leg$Red, green=glc_leg$Green, blue=glc_leg$Blue) 
+label <- glc_leg$CLASSNAMES 
+bounds <- glc_leg$VALUE
+opacity = c(rep(1, length(label)-1), 0)  # last class full transparency!
+
+l1 = newXMLNode("StyledLayerDescriptor", attrs=c(version="1.0.0"), namespaceDefinitions=c("xsi:schemaLocation"="http://www.opengis.net/sld StyledLayerDescriptor.xsd", "sld"="http://www.opengis.net/sld", "ogc"="http://www.opengis.net/ogc", "gml"="http://www.opengis.net/gml"))
+l2 <- newXMLNode("NamedLayer", parent = l1)
+l3 <- newXMLNode("Name", paste(Citation_title, "(", Format_Information_Content, ")", sep=""), parent = l2)
+l3b <- newXMLNode("UserStyle", parent = l2)
+l4 <- newXMLNode("Title", paste(obj.name, "style", sep="_"), parent = l3b)
+l4b <- newXMLNode("FeatureTypeStyle", parent = l3b)
+l5 <- newXMLNode("Rule", parent = l4b)
+l6 <- newXMLNode("RasterSymbolizer", parent = l5)
+l7 <- newXMLNode("ColorMap", attrs=c(type=ColorMap_type), parent = l6)
+txt <- sprintf('<ColorMapEntry color="#%s" quantity="%.2f" label="%s" opacity="%.1f"/>', pal, bounds, label, opacity)
+parseXMLAndAdd(txt, l7)
+saveXML(l1, sld.file)
+
+system(paste("xcopy", sld.file, shortPathName(normalizePath("D:/WORLDGRIDS/sld"))))
 
 # end of script;
 
