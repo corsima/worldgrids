@@ -1,13 +1,13 @@
-
 # title         : getSRTM.R
 # purpose       : download and resampling SRTM DEM 30 plus / ETOPO DEM;
 # reference     : [https://code.google.com/p/worldgrids/source/browse/]
 # producer      : Prepared by T. Hengl
 # version       : 1
-# inputs        : maps publicaly available at [ftp://topex.ucsd.edu/pub/srtm30_plus/srtm30/data/];
+# inputs        : maps publicaly available at [fhttp://www.ngdc.noaa.gov/mgg/bathymetry/relief.html] and [ftp://ftp.ngdc.noaa.gov/mgg/global/relief/];
 # outputs       : geotiff images projected in the "+proj=longlat +datum=WGS84" system;
 # remarks 1     : First download and install FWtools [http://fwtools.maptools.org];
-# remarks 2     : The resulting GlobeDEM is a combination (average) between SRMT 30+ and ETOPO DEM;  
+# remarks 2     : The resulting GlobeDEM is a combination (average) between SRMT 30+ and ETOPO DEM;
+# remarks 3     : The srtm30_plus [ftp://topex.ucsd.edu/pub/srtm30_plus/] showed some inconsistancies and hence was finally removed from the scriopt 
 
 # -------------------------------------------
 # Initial settings and data download:
@@ -24,64 +24,102 @@ gdalbuildvrt = shQuote(shortPathName(normalizePath(file.path(fw.path, "bin/gdalb
 download.file("http://downloads.sourceforge.net/project/sevenzip/7-Zip/9.20/7za920.zip", destfile=paste(getwd(), "/", "7za920.zip", sep="")) 
 unzip("7za920.zip")
 si <- Sys.info()
-outdir <- "D:/WORLDGRIDS/maps"
+outdir <- "G:/WORLDGRIDS/maps"
 
-# location of maps:
-URL <- "ftp://topex.ucsd.edu/pub/srtm30_plus/srtm30/data/"
-# list all tiles available:
-items <- strsplit(getURL(URL), "\n")[[1]]
-# convert to a character vector:
-srtm.list <- items[grep(items, pattern=".srtm")]
-srtm.list <- unlist(lapply(strsplit(srtm.list, ' '), function(x){x[length(x)]}))
-srtm.list <- unlist(lapply(strsplit(srtm.list, '\r'), function(x){x[1]}))
-str(srtm.list)
+## tiling system:
+t.l <- expand.grid(KEEP.OUT.ATTRS=FALSE, lonmin=seq(-180,120,by=60), latmin=seq(-90,45,by=45))
+t.u <- expand.grid(KEEP.OUT.ATTRS=FALSE, lonmax=seq(-120,180,by=60), latmax=seq(-45,90,by=45))
+tiles <- cbind(t.l, t.u)
 
-# download tiles from the server:
-for(j in srtm.list){
-  download.file(paste(URL, j, sep=""), destfile=paste(getwd(), j, sep="/")) 
+## ETOPO1 Global Relief Model
+download.file("http://www.ngdc.noaa.gov/mgg/global/relief/ETOPO1/data/bedrock/grid_registered/georeferenced_tiff/ETOPO1_Ice_g_geotiff.zip", destfile=paste(getwd(), "ETOPO1_Ice_g_geotiff.zip", sep="/"))
+unzip("ETOPO1_Ice_g_geotiff.zip")
+# split in blocks:
+for(j in 1:nrow(tiles)){
+  # resample
+  if(is.na(file.info(paste('ETOPO1_Ice_g_', j, '.sdat', sep=""))$size)){
+  system(paste(gdalwarp, ' ETOPO1_Ice_g.tif -ot Int16 -dstnodata -32767 -t_srs \"+proj=longlat +datum=WGS84\" ', paste('ETOPO1_Ice_g_', j, '.sdat', sep=""), ' -of \"SAGA\" -r bilinear -te ', tiles[j,"lonmin"] , ' ', tiles[j,"latmin"], ' ', tiles[j,"lonmax"] ,' ', tiles[j,"latmax"] ,' -tr ', 1/120, ' ', 1/120, sep=""))
+  }
 }
-# GDALinfo("e020n40.Bathymetry.srtm")
-## Not a GDAL supported format!
 
-# create a mosaic:
-rsaga.geoprocessor(lib="io_grid", 9, param=list(GRID="srtmdem1km.sgrd", PATH=getwd(), XMIN=-180, XMAX=180, YMIN=-90, YMAX=90, TILE_PATH=paste(srtm.list, collate=";", sep="")))  # takes time and memory!
-# GDALinfo("srtmdem1km.sdat")
-## Split into two tiles otherwise SAGA GIS faces memory limit problems:
-system(paste(gdalwarp, " srtmdem1km.sdat -t_srs \"+proj=longlat +datum=WGS84\" srtmdem1km_a.sdat -of \"SAGA\" -srcnodata \"-9999\" -dstnodata \"-32767\" -r bilinear -te -180 -90 0 90 -tr ", 1/120, " ", 1/120, sep=""))
-system(paste(gdalwarp, " srtmdem1km.sdat -t_srs \"+proj=longlat +datum=WGS84\" srtmdem1km_b.sdat -of \"SAGA\" -srcnodata \"-9999\" -dstnodata \"-32767\" -r bilinear -te 0 -90 180 90 -tr ", 1/120, " ", 1/120, sep=""))
+## GEBCO data set [https://www.bodc.ac.uk/data/online_delivery/gebco/gebco_08_grid/#sid]
+# GDALinfo("gebco_08.nc")
+rsaga.geoprocessor(lib="io_grid", 4, param=list(GRID="gebco_08.sgrd", FILE_DATA="gebco_08.nc", NX=43200, NY=21600, DXY=0.008333333333333333, XMIN=-182.546, YMIN=-90, DATA_TYPE=3, TOPDOWN=1, BYTEORDER_BIG=1, NODATA=65536, ZFACTOR=1, UNIT="meter"))
+## TH: for some unknown reason the coordinates have been shifted in x dimension by -2.546 degrees (?!)
+# split in blocks:
+for(j in 1:nrow(tiles)){
+  # resample
+  if(is.na(file.info(paste('gebco_08_', j, '.sdat', sep=""))$size)){
+  system(paste(gdalwarp, ' gebco_08.sdat -ot Int16 -dstnodata -32767 -t_srs \"+proj=longlat +datum=WGS84\" ', paste('gebco_08_', j, '.sdat', sep=""), ' -of \"SAGA\" -r bilinear -te ', tiles[j,"lonmin"] , ' ', tiles[j,"latmin"], ' ', tiles[j,"lonmax"] ,' ', tiles[j,"latmax"] ,' -tr ', 1/120, ' ', 1/120, sep=""))
+  # mask areas that are not of interest:
+  tmp <- readGDAL(paste('gebco_08_', j, '.sdat', sep=""))
+  tmp$band1 <- ifelse(tmp$band1>0, NA, tmp$band1)
+  writeGDAL(tmp[1], paste('gebco_08_', j, '.sdat', sep=""), 'SAGA', mvFlag=-32767, type='Int16')
+  }
+}
 
-# download ETOPO DEM (contains also elevations for <-60 S):
-download.file("ftp://ftp.ngdc.noaa.gov/mgg/global/relief/ETOPO1/bedrock/grid_registered/georeferenced_tiff/ETOPO1_Ice_g_geotiff.zip", destfile=paste(getwd(), "ETOPO1_Ice_g_geotiff.zip", sep="/"))
-unzip(zipfile="ETOPO1_Ice_g_geotiff.zip", exdir=getwd())
-GDALinfo("ETOPO1_Ice_g.tif")
-system(paste(gdalwarp, " ETOPO1_Ice_g.tif -t_srs \"+proj=longlat +datum=WGS84\" ETOPO1_a.sdat -of \"SAGA\" -r bilinear -te 0 -90 180 90 -tr ", 1/120, " ", 1/120, sep=""))
-system(paste(gdalwarp, " ETOPO1_Ice_g.tif -t_srs \"+proj=longlat +datum=WGS84\" ETOPO1_b.sdat -of \"SAGA\" -r bilinear -te -180 -90 0 90 -tr ", 1/120, " ", 1/120, sep=""))
+# download SRTM DEM (1 km):
+download.file("ftp://ftp.ntsg.umt.edu/pub/data/SRTM30_1km/Merged/SRTM30_merge.hdr", destfile=paste(getwd(), "SRTM30_merge.hdr", sep="/"))
+download.file("ftp://ftp.ntsg.umt.edu/pub/data/SRTM30_1km/Merged/SRTM30_merge.int16", destfile=paste(getwd(), "SRTM30_merge.int16", sep="/"))
+GDALinfo("SRTM30_merge.int16")
+system(paste(gdalwarp, ' SRTM30_merge.int16 -t_srs \"+proj=longlat +datum=WGS84\" SRTM30_merge.tif -r bilinear -te -180 -90 180 90 -tr ', 1/120, ' ', 1/120, sep=""))
+# split in blocks:
+for(j in 1:nrow(tiles)){
+  # resample
+  if(is.na(file.info(paste('SRTM30_merge_', j, '.sdat', sep=""))$size)){
+  unlink(paste('SRTM30_merge_', j, '.tif', sep=""))
+  system(paste(gdalwarp, ' SRTM30_merge.tif -ot Int16 -dstnodata -32767 -t_srs \"+proj=longlat +datum=WGS84\" ', paste('SRTM30_merge_', j, '.sdat', sep=""), ' -of \"SAGA\" -r bilinear -te ', tiles[j,"lonmin"] , ' ', tiles[j,"latmin"], ' ', tiles[j,"lonmax"] ,' ', tiles[j,"latmax"] ,' -tr ', 1/120, ' ', 1/120, sep=""))
+  # mask areas that are not of interest:
+  tmp <- readGDAL(paste('SRTM30_merge_', j, '.sdat', sep=""))
+  tmp$band1 <- ifelse(tmp$band1==0, NA, tmp$band1)
+  # oceans contain all empty pixels:
+  if(!is.logical(tmp$band1)){
+    tmp$band1 <- as.integer(tmp$band1)
+  }
+  writeGDAL(tmp[1], paste('SRTM30_merge_', j, '.sdat', sep=""), 'SAGA', mvFlag=-32767, type='Int16')
+  unlink(paste('SRTM30_merge_', j, '.tif', sep=""))
+  }
+}
 
-# mosaic/average two DEMs and create a complete DEM:
-rsaga.geoprocessor(lib="grid_tools", module=3, param=list(GRIDS="srtmdem1km_a.sgrd;ETOPO1_b.sgrd", GRID_TARGET="globedem_a.sgrd", MERGED="globedem_a.sgrd", TYPE=4, INTERPOL=1, OVERLAP=0, MERGE_INFO_MESH_SIZE=1/120))
-rsaga.geoprocessor(lib="grid_tools", module=3, param=list(GRIDS="srtmdem1km_b.sgrd;ETOPO1_a.sgrd", GRID_TARGET="globedem_b.sgrd", MERGED="globedem_b.sgrd", TYPE=4, INTERPOL=1, OVERLAP=0, MERGE_INFO_MESH_SIZE=1/120))  ## memory consuming / takes ca 10 mins!
+# merge the three DEMs:
+for(j in 1:nrow(tiles)){
+  if(is.na(file.info(paste("globedem_", j, ".sgrd", sep=""))$size)){
+  rsaga.geoprocessor(lib="grid_tools", module=3, param=list(GRIDS=paste("SRTM30_merge_", j, ".sgrd;gebco_08_", j, ".sgrd;ETOPO1_Ice_g_", j, ".sgrd", sep=""), GRID_TARGET=paste("globedem_", j, ".sgrd", sep=""), MERGED=paste("globedem_", j, ".sgrd", sep=""), TYPE=4, INTERPOL=1, OVERLAP=1, MERGE_INFO_MESH_SIZE=1/120))
+  }
+}
 
+# mosaic/average two DEMs and create a complete DEM
+unlink("globedem.vrt")
+system(paste(gdalbuildvrt, "globedem.vrt", paste("globedem_", 1:nrow(tiles), ".sdat", sep="", collapse=" ")))
 # convert to geotif (1 km):
-system(paste(gdalbuildvrt, "globedem.vrt globedem_a.sdat globedem_b.sdat"))
+unlink("DEMSRE3a.tif")
 system(paste(gdalwarp, "globedem.vrt -t_srs \"+proj=longlat +datum=WGS84\" DEMSRE3a.tif -r near -te -180 -90 180 90 -tr", 1/120, 1/120))
 GDALinfo("DEMSRE3a.tif")
+# 2.5 km:
+system(paste(gdalwarp, "DEMSRE3a.tif DEMSRE2a.tif -r bilinear -te -180 -90 180 90 -tr", 1/40, 1/40))
+# 5 km:
+system(paste(gdalwarp, "DEMSRE3a.tif DEMSRE1a.tif -r bilinear -te -180 -90 180 90 -tr", 1/20, 1/20))
+# 20 km:
+system(paste(gdalwarp, "DEMSRE1a.tif DEMSRE0a.tif -r bilinear -te -180 -90 180 90 -tr", 1/5, 1/5))
 
-# convert to geotif (5 km):
-system(paste(gdalwarp, "DEMSRE3a.tif DEMSRE1a.tif -r bilinear -te -180 -90 180 90 -tr", 6/120, 6/120))
 
 # -------------------------------------------
 # Derive basic DEM parameters:
 # -------------------------------------------
 
-system(paste(gdaldem, "slope DEMSRE3a.tif slope1km.tif -s 111120 -p"))  # takes > 5 mins
-# round the numbers to one 100/255 percent:
-system(paste(gdal_translate, "slope1km.tif SLPSRT3a.tif -ot Byte -scale 0 100 0 254"))
+for(i in 0:3){
+  if(is.na(file.info(paste('SLPSRT', i, 'a.tif', sep=""))$size)){
+    unlink("slope.tif")
+    # derive slope map:
+    system(paste(gdaldem, ' slope DEMSRE', i, 'a.tif slope.tif -s 111120 -p', sep=""))  # takes > 5 mins
+    # round the numbers to one 100/255 percent:
+    system(paste(gdal_translate, ' slope.tif SLPSRT', i, 'a.tif -ot Byte -scale 0 100 0 254', sep=""))
+  }
+}
+
 # system(paste(gdaldem, "TRI DEMSRE3a.tif TRI1km.tif -s 111120"))
 # system(paste(gdaldem, "TPI DEMSRE3a.tif TPI1km.tif -s 111120"))
 # system(paste(gdaldem, "roughness DEMSRE3a.tif RGHSRE3a.tif -s 111120"))
-system(paste(gdaldem, "slope DEMSRE1a.tif slope5km.tif -s 111120 -p"))
-# round the numbers to one 100/255 percent;
-system(paste(gdal_translate, "slope5km.tif SLPSRT1a.tif -ot Byte -scale 0 100 0 254"))
 
 # TO-DO: global SAGA TWI, solar insolation, and Valley depth
 
@@ -90,19 +128,20 @@ system(paste(gdal_translate, "slope5km.tif SLPSRT1a.tif -ot Byte -scale 0 100 0 
 # Compress produced maps:
 # -------------------------------------------
 
-for(outname in c("DEMSRE1a.tif", "DEMSRE3a.tif", "SLPSRT1a.tif", "SLPSRT3a.tif")){
+for(outname in c("DEMSRE0a.tif", "DEMSRE1a.tif", "DEMSRE2a.tif", "DEMSRE3a.tif", "SLPSRT0a.tif", "SLPSRT1a.tif", "SLPSRT2a.tif", "SLPSRT3a.tif")){
+  if(is.na(file.info(paste(shortPathName(normalizePath(outdir)), paste(outname, "gz", sep="."), sep="\\"))$size)){
   system(paste("7za a", "-tgzip", set.file.extension(outname, ".tif.gz"), outname))
   system(paste("xcopy", set.file.extension(outname, ".tif.gz"), shortPathName(normalizePath(outdir)))) 
-  unlink(set.file.extension(outname, ".tif.gz"))
+  # unlink(set.file.extension(outname, ".tif.gz"))
 }  # Compression takes > 15 mins
+}
 
 # Clean-up:
-unlink("srtmdem1km_b.*")
-unlink("srtmdem1km_a.*")
-unlink("ETOPO1_a.*")
-unlink("ETOPO1_b.*")
+rm(tmp)
+unlink("gebco_08_*.*")
+unlink("ETOPO1_Ice_g_*.*")
+unlink("SRTM30_merge_*.*")
 unlink("slope5km.tif")
 unlink("slope1km.tif")
-unlink("ETOPO1.*")
 
 # end script;
