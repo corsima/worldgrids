@@ -15,6 +15,8 @@
 
 library(RSAGA) 
 library(rgdal)
+library(raster)
+library(maptools)
 library(RCurl)
 fw.path = utils::readRegistry("SOFTWARE\\WOW6432Node\\FWTools")$Install_Dir
 gdalwarp = shQuote(shortPathName(normalizePath(file.path(fw.path, "bin/gdalwarp.exe"))))
@@ -27,9 +29,23 @@ si <- Sys.info()
 outdir <- "G:/WORLDGRIDS/maps"
 
 ## tiling system:
-t.l <- expand.grid(KEEP.OUT.ATTRS=FALSE, lonmin=seq(-180,120,by=60), latmin=seq(-90,45,by=45))
-t.u <- expand.grid(KEEP.OUT.ATTRS=FALSE, lonmax=seq(-120,180,by=60), latmax=seq(-45,90,by=45))
-tiles <- cbind(t.l, t.u)
+p.l <- expand.grid(KEEP.OUT.ATTRS=FALSE, lonmin=seq(-180,120,by=60), latmin=seq(-90,45,by=45))
+p.u <- expand.grid(KEEP.OUT.ATTRS=FALSE, lonmax=seq(-120,180,by=60), latmax=seq(-45,90,by=45))
+tiles <- cbind(p.l, p.u)
+tiles
+
+# convert to a polygon map:
+tiles.poly <- tiles
+tiles.poly$lon <- (tiles$lonmax - tiles$lonmin)/2 + tiles$lonmin 
+tiles.poly$lat <- (tiles$latmax - tiles$latmin)/2 + tiles$latmin
+tiles.pnt <- tiles.poly
+tiles.pnt$label <- paste("P", 1:nrow(tiles.pnt), sep="")
+coordinates(tiles.poly) <- ~ lon+lat
+gridded(tiles.poly) <- TRUE
+tiles.poly <- rasterToPolygons(raster(tiles.poly))
+writePolyShape(tiles.poly, "tiles.shp")
+coordinates(tiles.pnt) <- ~ lon+lat
+writePointsShape(tiles.pnt["label"], "tiles_label.shp")
 
 ## ETOPO1 Global Relief Model
 download.file("http://www.ngdc.noaa.gov/mgg/global/relief/ETOPO1/data/bedrock/grid_registered/georeferenced_tiff/ETOPO1_Ice_g_geotiff.zip", destfile=paste(getwd(), "ETOPO1_Ice_g_geotiff.zip", sep="/"))
@@ -80,11 +96,12 @@ for(j in 1:nrow(tiles)){
   unlink(paste('SRTM30_merge_', j, '.tif', sep=""))
   }
 }
+rm(tmp)
 
 # merge the three DEMs:
 for(j in 1:nrow(tiles)){
   if(is.na(file.info(paste("globedem_", j, ".sgrd", sep=""))$size)){
-  rsaga.geoprocessor(lib="grid_tools", module=3, param=list(GRIDS=paste("SRTM30_merge_", j, ".sgrd;gebco_08_", j, ".sgrd;ETOPO1_Ice_g_", j, ".sgrd", sep=""), GRID_TARGET=paste("globedem_", j, ".sgrd", sep=""), MERGED=paste("globedem_", j, ".sgrd", sep=""), TYPE=4, INTERPOL=1, OVERLAP=1, MERGE_INFO_MESH_SIZE=1/120))
+  rsaga.geoprocessor(lib="grid_tools", module=3, param=list(GRIDS=paste("SRTM30_merge_", j, ".sgrd;ETOPO1_Ice_g_", j, ".sgrd;gebco_08_", j, ".sgrd", sep=""), GRID_TARGET=paste("globedem_", j, ".sgrd", sep=""), MERGED=paste("globedem_", j, ".sgrd", sep=""), TYPE=4, INTERPOL=1, OVERLAP=1, MERGE_INFO_MESH_SIZE=1/120))
   }
 }
 
@@ -101,6 +118,34 @@ system(paste(gdalwarp, "DEMSRE3a.tif DEMSRE2a.tif -r bilinear -te -180 -90 180 9
 system(paste(gdalwarp, "DEMSRE3a.tif DEMSRE1a.tif -r bilinear -te -180 -90 180 90 -tr", 1/20, 1/20))
 # 20 km:
 system(paste(gdalwarp, "DEMSRE1a.tif DEMSRE0a.tif -r bilinear -te -180 -90 180 90 -tr", 1/5, 1/5))
+
+# Tile the 2.5 km DEMs so they can be uploaded to WorldGrids.org:
+b.l <- expand.grid(KEEP.OUT.ATTRS=FALSE, lonmin=seq(-180,0,by=180), latmin=seq(-90,0,by=90))
+b.u <- expand.grid(KEEP.OUT.ATTRS=FALSE, lonmax=seq(0,180,by=180), latmax=seq(0,90,by=90))
+btiles <- cbind(b.l, b.u)
+for(j in 1:nrow(btiles)){
+   outname = paste('DEMSRE2a_B', j, '.tif', sep="")
+   system(paste(gdalwarp, ' globedem.vrt -t_srs \"+proj=longlat +datum=WGS84\" ', outname, ' -r bilinear -te ', btiles[j,"lonmin"] , ' ', btiles[j,"latmin"], ' ', btiles[j,"lonmax"] ,' ', btiles[j,"latmax"] ,' -tr ', 1/40, ' ', 1/40, sep=""))
+   if(is.na(file.info(paste(shortPathName(normalizePath(outdir)), paste(outname, "gz", sep="."), sep="\\"))$size)){
+    system(paste("7za a", "-tgzip", set.file.extension(outname, ".tif.gz"), outname))
+    system(paste("xcopy", set.file.extension(outname, ".tif.gz"), shortPathName(normalizePath(outdir))))
+   }
+   unlink(outname)
+   unlink(set.file.extension(outname, ".tif.gz"))
+}
+
+# 1 km data:
+for(j in 1:nrow(tiles)){
+   outname = paste('DEMSRE3a_P', j, '.tif', sep="")
+   system(paste(gdalwarp, ' globedem.vrt -t_srs \"+proj=longlat +datum=WGS84\" ', outname, ' -r near -te ', tiles[j,"lonmin"] , ' ', tiles[j,"latmin"], ' ', tiles[j,"lonmax"] ,' ', tiles[j,"latmax"] ,' -tr ', 1/120, ' ', 1/120, sep=""))
+   if(is.na(file.info(paste(shortPathName(normalizePath(outdir)), paste(outname, "gz", sep="."), sep="\\"))$size)){
+    # maximum compression possible -- THIS TAKES A BIT MORE TIME!:
+    system(paste("7za a", "-tgzip -mx9", set.file.extension(outname, ".tif.gz"), outname))
+    system(paste("xcopy", set.file.extension(outname, ".tif.gz"), shortPathName(normalizePath(outdir))))
+   }
+   unlink(outname)
+   unlink(set.file.extension(outname, ".tif.gz"))
+}
 
 
 # -------------------------------------------
@@ -132,7 +177,7 @@ for(outname in c("DEMSRE0a.tif", "DEMSRE1a.tif", "DEMSRE2a.tif", "DEMSRE3a.tif",
   if(is.na(file.info(paste(shortPathName(normalizePath(outdir)), paste(outname, "gz", sep="."), sep="\\"))$size)){
   system(paste("7za a", "-tgzip", set.file.extension(outname, ".tif.gz"), outname))
   system(paste("xcopy", set.file.extension(outname, ".tif.gz"), shortPathName(normalizePath(outdir)))) 
-  # unlink(set.file.extension(outname, ".tif.gz"))
+  unlink(set.file.extension(outname, ".tif.gz"))
 }  # Compression takes > 15 mins
 }
 
