@@ -22,7 +22,7 @@ fw.path = utils::readRegistry("SOFTWARE\\WOW6432Node\\FWTools")$Install_Dir
 gdalwarp = shQuote(shortPathName(normalizePath(file.path(fw.path, "bin/gdalwarp.exe"))))
 gdal_translate = shQuote(shortPathName(normalizePath(file.path(fw.path, "bin/gdal_translate.exe"))))
 si <- Sys.info()
-outdir <- "D:/WORLDGRIDS/maps"
+outdir <- "G:/WORLDGRIDS/maps"
 
 download.file("ftp://hokusai.eorc.jaxa.jp/pub/gsmap_crest/MVK+/monthly/MVK+_2003-2006.tar.gz", destfile=paste(getwd(), "MVK+_2003-2006.tar.gz", sep="/"), mode='wb', method='wget')
 # unzip:
@@ -78,15 +78,18 @@ rsaga.geoprocessor(lib="geostatistics_grid", module=4, param=list(GRIDS="PREC.sg
 # convert to Geotif:
 system(paste(gdal_translate, "PREGSM1a.sdat PREGSM1a.tif -a_srs \"+proj=longlat +datum=WGS84\""))
 GDALinfo("PREGSM1a.tif")
+system(paste(gdalwarp, "PREGSM1a.sdat -t_srs \"+proj=longlat +datum=WGS84\" PREGSM0a.tif -srcnodata 0 -dstnodata 0 -r bilinear -te -180 -90 180 90 -tr 0.2 0.2"))
 
 # ------------------------------------
 # Compress produced maps:
 # ------------------------------------
 
-for(outname in c("PREGSM1a.tif")){
-  system(paste("7za a", "-tgzip", set.file.extension(outname, ".tif.gz"), outname))
-  system(paste("xcopy", set.file.extension(outname, ".tif.gz"), shortPathName(normalizePath(outdir)))) 
-  unlink(set.file.extension(outname, ".tif.gz"))
+for(outname in c("PREGSM1a.tif", "PREGSM0a.tif")){
+  if(is.na(file.info(paste(shortPathName(normalizePath(outdir)), paste(outname, "gz", sep="."), sep="\\"))$size)){
+    system(paste("7za a", "-tgzip", set.file.extension(outname, ".tif.gz"), outname))
+    system(paste("xcopy", set.file.extension(outname, ".tif.gz"), shortPathName(normalizePath(outdir)))) 
+    unlink(set.file.extension(outname, ".tif.gz"))
+  }
 }  # Compression takes > 15 mins
 
 # Clean-up:
@@ -121,6 +124,6 @@ txt <- sprintf('<ColorMapEntry color="#%s" quantity="%.2f" label="%s" opacity="%
 parseXMLAndAdd(txt, l7)
 saveXML(l1, sld.file)
 
-system(paste("xcopy", sld.file, shortPathName(normalizePath("D:/WORLDGRIDS/sld"))))
+system(paste("xcopy", "PREGSM1a.sld", shortPathName(normalizePath("G:/WORLDGRIDS/sld"))))
 
 # end of script; 

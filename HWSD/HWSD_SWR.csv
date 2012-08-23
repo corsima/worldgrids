@@ -1,0 +1,6 @@
+CODE;VALUE
+0;None
+1;Wet:  (0-80 cm) < 3 months; (0-40cm) < 1 month
+2;Wet:  (0-80 cm) 3-6 months; (0-40cm) < 1 month
+3;Wet:  (0-80 cm) > 6 months; 0-40 cm > 11 months
+4;Wet:   0-40 cm > 11 months

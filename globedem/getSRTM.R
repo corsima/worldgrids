@@ -3,7 +3,7 @@
 # reference     : [https://code.google.com/p/worldgrids/source/browse/]
 # producer      : Prepared by T. Hengl
 # version       : 1
-# inputs        : maps publicaly available at [fhttp://www.ngdc.noaa.gov/mgg/bathymetry/relief.html] and [ftp://ftp.ngdc.noaa.gov/mgg/global/relief/];
+# inputs        : maps publicaly available at [http://dds.cr.usgs.gov/srtm/version2_1/SRTM30/] [http://www.ngdc.noaa.gov/mgg/bathymetry/relief.html] and [ftp://ftp.ngdc.noaa.gov/mgg/global/relief/];
 # outputs       : geotiff images projected in the "+proj=longlat +datum=WGS84" system;
 # remarks 1     : First download and install FWtools [http://fwtools.maptools.org];
 # remarks 2     : The resulting GlobeDEM is a combination (average) between SRMT 30+ and ETOPO DEM;
@@ -75,6 +75,7 @@ for(j in 1:nrow(tiles)){
 }
 
 # download SRTM DEM (1 km):
+## HIR: use the offical version from the USGS site? [http://dds.cr.usgs.gov/srtm/version2_1/SRTM30/]
 download.file("ftp://ftp.ntsg.umt.edu/pub/data/SRTM30_1km/Merged/SRTM30_merge.hdr", destfile=paste(getwd(), "SRTM30_merge.hdr", sep="/"))
 download.file("ftp://ftp.ntsg.umt.edu/pub/data/SRTM30_1km/Merged/SRTM30_merge.int16", destfile=paste(getwd(), "SRTM30_merge.int16", sep="/"))
 GDALinfo("SRTM30_merge.int16")
