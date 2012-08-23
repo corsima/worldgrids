@@ -1,0 +1,234 @@
+CODE;VALUE
+1;Acrisol
+2;Ferric Acrisol
+3;Gleyic Acrisol
+4;Humic Acrisol
+5;Orthic Acrisol
+6;Plinthic Acrisol
+7;Cambisol
+8;Calcaric Cambisol
+9;Chromic Cambisol
+10;Calcaro-chromic Cambisol
+11;Humo-chromic Cambisol
+12;Calci-chromic Cambisol
+13;Rhodo-chromic Cambisol
+14;Dystric Cambisols
+15;Ando-dystric Cambisol
+16;Gleyo-eutric Cambisol
+17;Spodo-dystric Cambisol
+18;Eutric Cambisol
+19;Ando-eutric Cambisol
+20;Calcaro-eutric Cambisol
+21;Fluvi-eutric Cambisol
+22;Gleyo-eutric Cambisol
+23;Verti-eutric Cambisol
+24;Ferralic Cambisol
+25;Gleyic Cambisol
+26;Calcaro-gleyic Cambisol
+27;Eutri-gleyic Cambisol
+28;Stagno-gleyic Cambisol
+29;Spodo-gleyic Cambisol
+30;Verti-gleyic Cambisol
+31;Humic Cambisol
+32;Calcic Cambisol
+33;Fluvi-calcic Cambisol
+34;Humo-calcic Cambisol
+35;Calci-vertic Cambisol
+36;Mollic Cambisol
+37;Vertic Cambisol
+38;Calcaro-vertic Cambisol
+39;Calci-vertic Cambisol
+40;Gelic Cambisol
+41;Chernozem
+42;Stagno-gleyic Chernozem
+43;Haplic Chernozem
+44;Verti-haplic Chernozem
+45;Calcic Chernozem
+46;Vermi-calcic Chernozem
+47;Calcaro-calcic Chernozem
+48;Vermi-calcaro-calcic Chernozem
+49;Luvic Chernozem
+50;Podzolluvisol
+51;Dystric Podzoluvisol
+52;Eutric Podzoluvisol
+53;Gleyic Podzoluvisol
+54;Dystri-gleyic Podzoluvisol
+55;Eutri-gleyic Podzoluvisol
+56;Stagno-gleyic Podzoluvisol
+57;Rendzina
+58;Cambic Rendzina
+59;Histic Rendzina
+60;Orthic Rendzina
+61;Umbric Rendzina
+62;Gleysol
+63;Calcaric Gleysol
+64;Fluvi-calcaric Gleysol
+65;Stagno-calcaric Gleysol
+66;Dystric Gleysol
+67;Stagno-dystric Gleysol
+68;Eutric Gleysol
+69;Fluvi-eutric Gleysol
+70;Humi-eutric Gleysol
+71;Stagno-eutric Gleysol
+72;Verti-eutric Gleysol
+73;Fluvic Gleysol
+74;Molli-fluvic Gleysol
+75;Humic Gleysol
+76;Fluvi-humic Gleysol
+77;Histo-humic Gleysol
+78;Histo-humo-calcaric Gleysol
+79;Thioni-humic Gleysol
+80;Histic Gleysol
+81;Humo-histic Gleysol
+82;Luvic Gleysol
+83;Stagno-luvic Gleysol
+84;Mollic Gleysols
+85;Calcaro-mollic Gleysol
+86;Fluvi-mollic Gleysol
+87;Stagno-mollic Gleysol
+88;Stagnic Gleysol
+89;Thionic Gleysols
+90;Gelic Gleysol
+91;Phaeozem
+92;Calcaric Phaeozem
+93;Vermi-calcaric Phaeozem
+94;Fluvi-calcaric Phaeozem
+95;Gleyo-calcaric Phaeozem
+96;Alkalino-Calcaric Phaeozem
+97;Gleyic Phaeozems
+98;Calcaro-gleyic Phaeozem
+99;Stagno-gleyic Phaeozem
+100;Verti-gleyic Phaeozem
+101;Haplic Phaeozem
+102;Verti-haplic Phaeozem
+103;Luvic Phaeozems
+104;Verti-luvic Phaeozem
+105;Haplic Phaeozem
+106;Lithosol
+107;Calcaric Lithosol
+108;Humo-calcaric Lithosol
+109;Dystric Lithosol
+110;Eutric Lithosol
+111;Fluvisol
+112;Calcaric Fluvisol
+113;Fluvi-calcaric Fluvisol
+114;Gleyo-calcaric Fluvisol
+115;Dystric Fluvisol
+116;Gleyo-dystric Fluvisol
+117;Eutric Fluvisols
+118;Fluvi-eutric Fluvisol
+119;Gleyo-eutric Fluvisol
+120;Mollic Fluvisols
+121;Gleyo-mollic Fluvisol
+122;Verti-mollic Fluvisol
+123;Thionic Fluvisol
+124;Haplic Kastanozem
+125;Calcic Kastanozem
+126;Vermi-calcic Kastanozem
+127;Verti-calcic Kastanozem
+128;Luvic Kastanozems
+129;Orthic Kastanozems
+130;Luvisol
+131;Albic Luvsol
+132;Chromic Luvisol
+133;Plano-chromic Luvisol
+134;Rhodo-chromic Luvisol
+135;Chromo-vertic Luvisol
+136;Dystric Luvisol
+137;Gleyo-dystric Luvisol
+138;Ferric Luvisol
+139;Gleyic Luvisol
+140;Albo-gleyic Luvisol
+141;Plano-gleyic Luvisol
+142;Stagno-gleyic Luvisol
+143;Humic Luvisol
+144;Calcic Luvisol
+145;Chromo-calcic Luvisol
+146;Rhodo-chromo-calcic Luvisol
+147;Verti-calcic Luvisol
+148;Orthic Luvisol
+149;Plano-orthic Luvisol
+150;Plinthic Luvisol
+151;Vertic Luvisols
+152;Chromo-vertic Luvisol
+153;Calci-vertic Luvisol
+154;Orthic Greyzem
+155;Histosol
+156;Dystric Histosol
+157;Placi-dystric Histosol
+158;Eutric Histosol
+159;Gelic Histosol
+160;Podzol
+161;Ferric Podzol
+162;Gleyic Podzol
+163;Histo-gleyic Podzol
+164;Stagno-gleyic Podzol
+165;Humic Podzol
+166;Ferro-humic Podzol
+167;Leptic Podzol
+168;Humo-leptic Podzol
+169;Orthic Podzols
+170;Ferro-orthic Podzol
+171;Humo-orthic Podzol
+172;Placic Podzol
+173;Arenosol
+174;Albic Arenosol
+175;Cambic Arenosol
+176;Calcaro-cambicx Arenosol
+177;Dystri-cambic Arenosol
+178;Gleyo-cambic Arenosol
+179;Spodo-cambic Arenosol
+180;Haplic Arenosol
+181;Luvic Arenosols
+182;Dystri-luvic Arenosol
+183;Gleyo-luvic Arenosol
+184;Regosol
+185;Calcaric Regosol
+186;Dystric Regosol
+187;Stagno-dystric Regosol
+188;Eutric Regosol
+189;Gelic Regosol
+190;Gleyic Solonetz
+191;Mollic Solonetz
+192;Orthic Solonetz
+193;Fluvi-orthic Solonetz
+194;Humic Andosol
+195;Mollic Andosol
+196;Haplic Andosol
+197;Vitric Andosol
+198;Ranker
+199;Dystric Ranker
+200;Calcaric Ranker
+201;Vertisol
+202;Chromic Vertisol
+203;Calcaro-chromic Vertisol
+204;Gleyic Vertisol
+205;Pellic Vertisol
+206;Calcaro-pellic Vertisol
+207;Gleyo-pellic Vertisol
+208;Sodi-pellic Vertisol
+209;Planosol
+210;Dystric Planosol
+211;Verti-dystric Planosol
+212;Eutric Planosols
+213;Verti-eutric Planosol
+214;Humic Planosol
+215;Mollic Planosol
+216;Solodic Planosol
+217;Calcic Xerosol
+218;Luvic Xerosol
+219;Gypsic Xerosol
+220;Solonchak
+221;Gleyic Solonchak
+222;Fluvi-gleyic Slonchak
+223;Orthic Solonchak
+224;Thionic Solonchak
+225;Plaggensol
+226;Rock outcrops
+227;Human disturbed soil
+228;Urban, mining, etc.
+229;Marsh
+230;Water bodies
+231;Glaciers
+232;not surveyed
+233;No Data

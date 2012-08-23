@@ -1,0 +1,194 @@
+CODE;VALUE
+1;FLUVISOLS
+2;Eutric Fluvisols
+3;Calcaric Fluvisols
+4;Dystric Fluvisols
+5;Mollic Fluvisols
+6;Umbric Fluvisols
+7;Thionic Fluvisols
+8;Salic Fluviosls
+9;GLEYSOLS
+10;Eutric Gleysols
+11;Calcic Gleysols
+12;Dystric Gleysols
+13;Andic Gleysols
+14;Mollic Gleysols
+15;Umbric Gleysols
+16;Thionic Gleysols
+17;Gelic Gleysols
+18;ACRISOLS
+19;Haplic Acrisols
+20;Ferric Acrisols
+21;Humic Acrisols
+22;Plinthic Acrisols
+23;Gleyic Acrisols
+24;ALISOLS
+25;Haplic Alisols
+26;Ferric Alisols
+27;Humic Alisols
+28;Plinthic Alisols
+29;Stagnic Alisols
+30;Gleyic Alisols
+31;ANDOSOLS
+32;Haplic Andosols
+33;Mollic Andosols
+34;Umbric Andosols
+35;Vitric Andosols
+36;Gleyic Andosols
+37;Gelic Andosols
+38;ARENOSOLS
+39;Haplic Arenosols
+40;Cambic Arenosols
+41;Luvic Arenosols
+42;Ferralic Arenosols
+43;Albic Arenosols
+44;Calcaric Arenosols
+45;Gleyic Arenosols
+46;ANTHROSOLS
+47;Aric Anthrosols
+48;Cumulic Anthrosols
+49;Fimic Anthrosols
+50;Urbic Anthrosols
+51;CHERNOZEMS
+52;Haplic Chernozems
+53;Calcic Chernozems
+54;Luvic Chernozems
+55;Glossic Chernozems
+56;Gleyic Chernozems
+57;CALCISOLS
+58;Haplic Calcisols
+59;Luvic Calcisols
+60;Petric Calcisols
+61;CAMBISOLS
+62;Eutric Cambisols
+63;Dystric Cambisols
+64;Humic Cambisols
+65;Calcaric Cambisols
+66;Chromic Cambisols
+67;Vertic Cambisols
+68;Ferralic Cambisols
+69;Gleyic Cambisols
+70;Gelic Cambisols
+71;FERRALSOLS
+72;Haplic Ferralsols
+73;Xanthic Ferralsols
+74;Rhodic Ferralsols
+75;Humic Ferralsols
+76;Geric Ferralsols
+77;Plinthic Ferralsols
+78;GREYZEMS
+79;Haplic Greyzems
+80;Gleyic Greyzems
+81;GYPSISOLS
+82;Haplic Gypsisols
+83;Calcic Gypsisols
+84;Luvic Gypsisols
+85;Petric Gypsisols
+86;HISTOSOLS
+87;Folic Histosols
+88;Terric Histosols
+89;Fibric Histosols
+90;Thionic Histosols
+91;Gelic Histosols
+92;KASTANOZEMS
+93;Haplic Kastanozems
+94;Luvic Kastanozems
+95;Calcic Kastanozems
+96;Gypsic Kastanozems
+97;LEPTOSOLS
+98;Eutric Leptosols
+99;Dystric Leptosols
+100;Rendzic Leptosols
+101;Mollic Leptosols
+102;Umbric Leptosols
+103;Lithic Leptosols
+104;Gelic Leptosols
+105;LUVISOLS
+106;Haplic Luvisols
+107;Ferric Luvisols
+108;Chromic Luvisols
+109;Calcic Luvisols
+110;Vertic Luvisols
+111;Albic Luvsiols
+112;Stagnic Luvisols
+113;Gleyic Luvisols
+114;LIXISOLS
+115;Haplic Lixisols
+116;Ferric Lixisols
+117;Plinthic Lixisols
+118;Albic Lixisols
+119;Stagnic Lixisols
+120;Gleyic Lixisols
+121;NITISOLS
+122;Haplic Nitisols
+123;Rhodic Nitisols
+124;Humic Nitisols
+125;PODZOLUVISOLS
+126;Eutric Podzoluvisols
+127;Dystric Podzoluvisols
+128;Stagnic Podzoluvisols
+129;Gleyic Podzoluvisols
+130;Gelic Podzoluvisols
+131;PHAEOZEMS
+132;Haplic Phaeozems
+133;Calcaric Phaeozems
+134;Luvic Phaeozems
+135;Stagnic Phaeozems
+136;Gleyic Phaeozems
+137;PLANOSOLS
+138;Eutric Planosols
+139;Dystric Planosols
+140;Mollic Planosols
+141;Umbric Planosols
+142;Gelic Planosols
+143;PLINTHOSOLS
+144;Eutric Plinthosols
+145;Dystric Plinthosols
+146;Humic Plinthosols
+147;Albic Plinthosols
+148;PODZOLS
+149;Haplic Podzols
+150;Cambic Podzols
+151;Ferric Podzols
+152;Carbic Podzols
+153;Gleyic Podzols
+154;Gelic Podzols
+155;REGOSOLS
+156;Eutric Regosols
+157;Calcaric Regosols
+158;Gypsic Regosols
+159;Dystric Regosols
+160;Umbric Regosols
+161;Gelic Regosols
+162;SOLONCHAKS
+163;Haplic Solonchaks
+164;Mollic Solonchaks
+165;Gleyic Solonchaks
+166;Calcic Solonchaks
+167;Gypsic Solonchaks
+168;Sodic Solonchaks
+169;Gelic Solonchaks
+170;SOLONETZ
+171;Haplic Solonetz
+172;Mollic Solonetz
+173;Calcic Solonetz
+174;Gypsic Solonetz
+175;Stagnic Solonetz
+176;Gleyic Solonetz
+177;VERTISOLS
+178;Eutric Vertisols
+179;Dystric Vertisols
+180;Calcic Vertisols
+181;Gypsic Vertisols
+194;Dunes & shift.sands
+195;Salt flats
+196;Rock outcrops
+197;Inland water, salt
+198;Water bodies
+199;Glaciers
+200;No Data
+201;Urban, mining, etc.
+202;Humanly disturbed
+203;Marsh
+204;Fishpond
+205;Island
