@@ -27,7 +27,7 @@ gdalbuildvrt = shQuote(shortPathName(normalizePath(file.path(fw.path, "bin/gdalb
 download.file("http://downloads.sourceforge.net/project/sevenzip/7-Zip/9.20/7za920.zip", destfile=paste(getwd(), "/", "7za920.zip", sep="")) 
 unzip("7za920.zip")
 si <- Sys.info()
-outdir <- "D:/WORLDGRIDS/maps"
+outdir <- "G:/WORLDGRIDS/maps"
 
 # get scene IDs and dates (begin):
 ID.list <- as.list(rep(NA, 13))
@@ -79,30 +79,33 @@ unlink("LAIs_5km.sdat")
 system(paste(gdalwarp, "LAIs.sdat -t_srs \"+proj=longlat +datum=WGS84\" LAIs_5km.sdat -srcnodata \"-99999\" -dstnodata \"-99999\" -of \"SAGA\" -r cubicspline -te -180 -90 180 90 -tr", 6/120, 6/120))
 
 # download mask map and fix some missing pixels:
-download.file("http://spatial-analyst.net/worldmaps/landmask.zip", destfile=paste(getwd(), "landmask.zip", sep="/"))  # update with WorldGrids.org zip file!
-unzip(zipfile="landmask.zip", exdir=getwd())
-grids5km <- readGDAL("landmask.tif")
+download.file("http://worldgrids.org/lib/exe/fetch.php?media=lmtgsh1a.tif.gz", destfile=paste(getwd(), "lmtgsh1a.tif.gz", sep="/"))  
+system(paste("7za e", "lmtgsh1a.tif.gz")) 
+grids5km <- readGDAL("lmtgsh1a.tif")
 grids5km$LAIm <- readGDAL("LAIm_5km.sdat")$band1
 grids5km$LAIs <- readGDAL("LAIs_5km.sdat")$band1
-grids5km$LAImf <- round(ifelse(grids5km$band1==-32767, 0, ifelse(is.na(grids5km$LAIm), 0, grids5km$LAIm)), 1)
+grids5km$LAImf <- round(ifelse(grids5km$band1==0, 0, ifelse(is.na(grids5km$LAIm), 0, grids5km$LAIm)), 1)
 proj4string(grids5km) <- CRS("+proj=longlat +datum=WGS84")
 # write to GeoTiff format:
 writeGDAL(grids5km["LAImf"], "LAIMOD1a.tif", "GTiff", type="Byte")
 writeGDAL(grids5km["LAIs"], "LASMOD1a.tif", "GTiff", type="Byte")
 # soil mask:
-grids5km$soilmask <- ifelse(grids5km$band1==-32767, 0, ifelse(grids5km$LAIm>0, 1, 0)) 
+grids5km$soilmask <- ifelse(grids5km$band1==0, 0, ifelse(grids5km$LAIm>0, 1, 0)) 
 writeGDAL(grids5km["soilmask"], "SMKMOD1a.tif", "GTiff", type="Byte")
 # check consistency:
 GDALinfo("SMKMOD1a.tif")
 
-for(outname in c("LAIMOD1a.tif", "LASMOD1a.tif", "SMKMOD1a.tif")){
+## resample to 20 km res:
+system(paste(gdalwarp, ' SMKMOD1a.tif -t_srs \"+proj=longlat +datum=WGS84\" SMKMOD0a.tif -r near -te -180 -90 180 90 -tr ', 1/5,' ', 1/5, sep=""))
+
+## compress:
+for(outname in c("SMKMOD1a.tif", "SMKMOD0a.tif")){ ## "LAIMOD1a.tif", "LASMOD1a.tif", 
   system(paste("7za a", "-tgzip", set.file.extension(outname, ".tif.gz"), outname))
   system(paste("xcopy", set.file.extension(outname, ".tif.gz"), shortPathName(normalizePath(outdir)))) 
   unlink(set.file.extension(outname, ".tif.gz"))
 }
 
 # Clean-up:
-unlink("LAIs_5km.*")
 rm(grids5km)
 
 # end of script;

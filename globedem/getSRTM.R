@@ -32,7 +32,7 @@ outdir <- "G:/WORLDGRIDS/maps"
 p.l <- expand.grid(KEEP.OUT.ATTRS=FALSE, lonmin=seq(-180,120,by=60), latmin=seq(-90,45,by=45))
 p.u <- expand.grid(KEEP.OUT.ATTRS=FALSE, lonmax=seq(-120,180,by=60), latmax=seq(-45,90,by=45))
 tiles <- cbind(p.l, p.u)
-tiles
+str(tiles)
 
 # convert to a polygon map:
 tiles.poly <- tiles
