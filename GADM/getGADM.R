@@ -5,12 +5,8 @@
 # last update   : In Wageningen, NL, Nov 2012.
 # inputs        : data available for download from [http://www.gadm.org/world]; 
 # outputs       : geotiff images projected in the "+proj=longlat +ellps=WGS84" system;
-# remarks 1     : First download and install SAGA GIS [http://www.saga-gis.org] and FWtools [http://fwtools.maptools.org];  
+# remarks 1     : First download and install SAGA GIS [http://www.saga-gis.org] and FWtools [http://fwtools.maptools.org]; 
 
-
-# ------------------------------------------------------------
-# Initial settings and data download:
-# ------------------------------------------------------------
 
 library(RSAGA) 
 library(rgdal)
@@ -29,8 +25,12 @@ ogrInfo("gadm2.shp", "gadm2")
 ## Get the country names (ISO standard)
 gadm <- read.dbf("gadm2.dbf")  ## Large DBF!
 str(gadm)
+gadm$dbf[which(gadm$dbf$NAME_0=="Angola")[1],"ISO"]
 cnt = aggregate(gadm$dbf[,"ID_0"], by=list(gadm$dbf$ISO), FUN=mean)
 str(cnt)
+ISO.country = cnt
+names(ISO.country) <- c("ISO", "id")
+save(ISO.country, file="ISO.country.rda")
 
 ## make a PAL file:
 rgb.tbl <- data.frame(R=NA, G=NA, B=NA)
@@ -52,11 +52,11 @@ BGR <- (rgb.tbl$B * 65536) + (rgb.tbl$G * 256) + rgb.tbl$R
 filename <- file("cntgad.txt", "w", blocking=FALSE)
 write("COLOR\tNAME\tDESCRIPTION\tMINIMUM\tMAXIMUM", filename)
 for(i in 1:nrow(cnt)){
-  write(paste(BGR[i], cnt[i,"ISO"], paste("CL", i, sep=""), (i-1)+0.1, (i+1)+0.1, sep="\t"), filename, append=TRUE)
+  write(paste(BGR[i], cnt[i,"Group.1"], paste("CL", i, sep=""), (cnt[i,"x"]-1)+0.1, (cnt[i,"x"]+1)+0.1, sep="\t"), filename, append=TRUE)
 }
 close(filename)
 
-# convert to raster (use the polygon ID):
+## convert to raster (use the polygon ID):
 rsaga.geoprocessor(lib="grid_gridding", module=0, param=list(USER_GRID="countries.sgrd", INPUT="gadm2.shp", FIELD=1, TARGET=0, LINE_TYPE=1, USER_SIZE=1/120, USER_XMIN=-180+1/120*0.5, USER_XMAX=180-1/120*0.5, USER_YMIN=-90+1/120*0.5, USER_YMAX=90-1/120*0.5)) # takes cca 5 mins uses > 6GB!!
 ## export to geotiff:
 # system(paste(gdal_translate, "countries.sdat CNTGAD3a.tif -a_srs \"+proj=longlat +datum=WGS84\" -ot \"Byte\""))
@@ -88,18 +88,8 @@ for(i in 0:3){
     unlink(set.file.extension(outname, ".tif.gz"))
 }
 
-# clean up temp files:
+## clean up temp files:
 unlink(list.files(pattern=glob2rx("countries.*")))
-
-## prepare lines using the GADM:
-# import shape(D:\Worldmaps\GADM\gadm1_lev0_lines.shp, D:\Worldmaps\GADM\gadm1_lev0_lines.ioc)
-## Simplify lines (tunelling):
-# gadm1_lev0_f.mps = SegmentMapTunneling(gadm1_lev0_lines,0.001000,yes)
-# export Shapefile(gadm1_lev0_f.mps,worldborders_gadm)
-# reproject map to Google Maps coordinate system:
-# gadm_lev0_gc <- readShapeLines("worldborders_gadm_gc.shp")
-# proj4string(gadm_lev0_gc) <- CRS("+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs")
-# save(gadm_lev0_gc, file="gadm_lev0_gc.RData")
 
 
 # end of script;
