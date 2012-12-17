@@ -167,9 +167,6 @@ for(i in 0:3){
 # system(paste(gdaldem, "TPI DEMSRE3a.tif TPI1km.tif -s 111120"))
 # system(paste(gdaldem, "roughness DEMSRE3a.tif RGHSRE3a.tif -s 111120"))
 
-# TO-DO: global SAGA TWI, solar insolation, and Valley depth
-
-
 
 # -------------------------------------------
 # Compress produced maps:
