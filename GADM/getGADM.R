@@ -91,5 +91,41 @@ for(i in 0:3){
 ## clean up temp files:
 unlink(list.files(pattern=glob2rx("countries.*")))
 
+## Continents:
+download.file("http://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/cultural/ne_10m_admin_0_countries.zip", "ne_10m_admin_0_countries.zip") 
+unzip("ne_10m_admin_0_countries.zip")
+## import to R:
+admin.wrld = readShapePoly("ne_10m_admin_0_countries.shp")
+proj4string(admin.wrld) <- "+proj=latlong +datum=WGS84"
+admin.wrld.l <- as(admin.wrld, "SpatialLinesDataFrame")
+
+## continents and coordinate systems:
+## Australia and New Zealand: 
+au.csy = "+proj=aea +lat_1=-18 +lat_2=-36 +lat_0=0 +lon_0=132 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
+## (Africa) proj4: 
+af.csy = "+proj=laea +lat_0=5 +lon_0=20 +x_0=0 +y_0=0 +units=m +ellps=WGS84 +datum=WGS84"
+## South Asia:
+sas.csy = "+proj=lcc +lat_1=7 +lat_2=-32 +lat_0=-15 +lon_0=125 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs"
+## North Asia:
+nas.csy = "+proj=lcc +lat_1=15 +lat_2=65 +lat_0=30 +lon_0=95 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs"
+## Europe:
+eu.csy = "+proj=laea +lat_0=52 +lon_0=10 +x_0=4321000 +y_0=3210000 +ellps=GRS80 +units=m +no_defs"
+## North America: 
+na.csy = "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +datum=NAD83 +units=m +no_defs"
+## South/Central America:
+sa.csy = "+proj=aea +lat_1=-5 +lat_2=-42 +lat_0=-32 +lon_0=-60 +x_0=0 +y_0=0 +ellps=aust_SA +units=m +no_defs"
+## Antartica:
+ant.csy = "+proj=stere +lat_0=-90 +lat_ts=-71 +lon_0=0 +k=1 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs"
+## Artic:
+art.csy = "+proj=stere +lat_0=90 +lat_ts=71 +lon_0=0 +k=1 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs"
+
+## bounding boxes:
+continents <- data.frame(conts = c("au", "af", "sas", "nas", "eu", "na", "sa", "ant", "art"), xmin=c(-5013000, -4739000, -10733000, -4191000, 2426000, -4792000, -4013000, -2963000, -2963000), 
+xmax=c(5946000, 4090000, 1454000, 4096000, 7294000, 3353000, 3289000, 2983000, 2983000), ymin=c(-6420000, -4394000, 961000, 316000, 1428000, -1856000, -3380000, -2708000, -2708000), 
+ymax=c(600000, 3741000, 9400000, 5966000, 5447000, 5753000, 5780000, 2524000, 2524000), csy = c(au.csy, af.csy, sas.csy, nas.csy, eu.csy, na.csy, sa.csy, ant.csy, art.csy))
+save(continents, file="continents.rda")
+
+
+
 
 # end of script;
