@@ -81,7 +81,6 @@ for(outname in c("LMTGSH3a.tif", "LMTGSH2a.tif", "LMTGSH1a.tif", "LMTGSH0a.tif",
 }  # Compression takes > 15 mins
 }
 
-
 # ------------------------------------------------------------
 # Global distance to continents map
 # ------------------------------------------------------------
@@ -112,7 +111,7 @@ shell(cmd=paste(ILWIS, " dcoast_Cw.mpr{dom=value.dom;vr=0:100000000:1} = MapDist
 shell(cmd=paste(ILWIS, " dcoast_C.mpr{dom=value.dom;vr=-100000:100000:1} = (dcoast_Cf - dcoast_Cw) / 1000", sep=""), wait=F)
 
 ## Resample back to geographic coords:
-system(paste(gdalwarp, ' dcoast_A.mpr dcoast_A.sdat -of \"SAGA\" -s_srs \"', g.csy, '\" -t_srs \"+proj=longlat +datum=WGS84\" -r bilinear -tr 0.05 0.05 -te -180 -90 180 90', sep=""))
+system(paste(gdalwarp, ' dcoast_A.mpr dcoast_A.sdat -of \"SAGA\" -s_srs \"', g.csy, '\" -t_srs \"+proj=longlat +datum=WGS84\" -dstnodata \"-2147483647\" -r bilinear -tr 0.05 0.05 -te -180 -90 180 90', sep=""))
 system(paste(gdalwarp, ' dcoast_B.mpr dcoast_B.sdat -of \"SAGA\" -s_srs \"', g2.csy, '\" -t_srs \"+proj=longlat +datum=WGS84\" -r bilinear -tr 0.05 0.05 -te 20 -90 180 90', sep=""))
 system(paste(gdalwarp, ' dcoast_C.mpr dcoast_C.sdat -of \"SAGA\" -s_srs \"', g3.csy, '\" -t_srs \"+proj=longlat +datum=WGS84\" -r bilinear -tr 0.05 0.05 -te -180 -90 21 90', sep=""))
 
@@ -133,5 +132,29 @@ for(i in 1:length(tif2.lst)){
     system(paste("xcopy", set.file.extension(tif2.lst[i], ".tif.gz"), shortPathName(normalizePath(outdir)))) 
     unlink(set.file.extension(tif2.lst[i], ".tif.gz"))
 }
+
+# ------------------------------------------------------------
+# Robinson projection
+# ------------------------------------------------------------
+
+system(paste(gdalwarp, 'LMBGSH1a.tif landmaskn_rob.mpr -of \"ILWIS\" -t_srs \"+proj=robin +lon_0=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs\" -r near -tr', 5000, 5000))
+landm5km <- readGDAL("landmaskn_rob.mpr")
+landm5km$mask <- readGDAL("landmaskn_rob_pol.mpr")$band1
+landm5km$m <- ifelse(is.na(landm5km$mask), NA, ifelse(landm5km$band1>0, 1, 0)) 
+str(landm5km)
+writeGDAL(landm5km["m"], "landm5km.tif", "GTiff", mvFlag=255, type="Byte")
+
+## 20 km grid:
+#system(paste(gdalwarp, 'landmaskn.sdat landmaskn_rob20km.mpr -of \"ILWIS\" -s_srs \"+proj=longlat +datum=WGS84\" -t_srs \"+proj=robin +lon_0=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs\" -r bilinear -ot \"Float32\" -tr', 20000, 20000))
+#system(paste(gdalwarp, 'landmaskn_rob_pol.mpr landmaskn_rob_pol20km.mpr -of \"ILWIS\" -r near -tr 20000 20000'))
+landm20km <- readGDAL("landm5km_rob20km.sdat")
+names(landm20km) = "mask"
+proj4string(landm20km) = "+proj=robin +lon_0=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs"
+landm20km$mask <- ifelse(landm20km$mask<0.5, 0, 1) 
+spplot(landm20km[1])
+save(landm20km, file="landm20km.rda", compress="xz")
+#landmask20km = as.data.frame(landm20km)
+#save(landmask20km, file="landmask20km.rda", compress="xz")
+str(landm20km)
 
 # end of script;

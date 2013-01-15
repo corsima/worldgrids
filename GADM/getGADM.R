@@ -92,7 +92,7 @@ for(i in 0:3){
 unlink(list.files(pattern=glob2rx("countries.*")))
 
 ## Continents:
-download.file("http://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/cultural/ne_10m_admin_0_countries.zip", "ne_10m_admin_0_countries.zip") 
+download.file("http://www.naturalearthdata.com/download/10m/cultural/ne_10m_admin_0_countries.zip", "ne_10m_admin_0_countries.zip") 
 unzip("ne_10m_admin_0_countries.zip")
 ## import to R:
 admin.wrld = readShapePoly("ne_10m_admin_0_countries.shp")
