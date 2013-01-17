@@ -157,4 +157,6 @@ save(landm20km, file="landm20km.rda", compress="xz")
 #save(landmask20km, file="landmask20km.rda", compress="xz")
 str(landm20km)
 
+rm(landm5km)
+
 # end of script;
