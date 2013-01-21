@@ -167,7 +167,7 @@ list.dates$mon_b= as.character(as.numeric(format(list.dates$date_b, "%m") ) -1 )
 
 
 
-gridtiling(file_path="demsre3.sgrd", # path to grid file in SAGA format, in this case DEM in sinusoidal projection, resolution 1 km 
+gridtiling(file_path="demsre3.sgrd", # path to grid file in SAGA format, in this case DEM in sinusoidal projection (source http://worldgrids.org/doku.php?id=wiki:demsre3), resolution 1 km 
            tilename="dem", # prexif to be given to tile names
            tile_size=1000, # in cells 
            overlapping=50, # in cells
