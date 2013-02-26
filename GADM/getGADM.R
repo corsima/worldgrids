@@ -99,7 +99,10 @@ admin.wrld = readShapePoly("ne_10m_admin_0_countries.shp")
 proj4string(admin.wrld) <- "+proj=latlong +datum=WGS84"
 admin.wrld.l <- as(admin.wrld, "SpatialLinesDataFrame")
 
-## continents and coordinate systems:
+## continents and land mask:
+download.file("http://worldgrids.org/lib/exe/fetch.php?media=lmtgsh3a.tif.gz", "lmtgsh3a.tif.gz")
+system(paste("7za e lmtgsh3a.tif.gz"))
+
 ## Australia and New Zealand: 
 au.csy = "+proj=aea +lat_1=-18 +lat_2=-36 +lat_0=0 +lon_0=132 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
 ## (Africa) proj4: 
@@ -118,14 +121,40 @@ sa.csy = "+proj=aea +lat_1=-5 +lat_2=-42 +lat_0=-32 +lon_0=-60 +x_0=0 +y_0=0 +el
 ant.csy = "+proj=stere +lat_0=-90 +lat_ts=-71 +lon_0=0 +k=1 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs"
 ## Artic:
 art.csy = "+proj=stere +lat_0=90 +lat_ts=71 +lon_0=0 +k=1 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs"
+## North Pacific ocean (Hawaii):
+npo.csy = "+proj=aea +lat_1=8 +lat_2=18 +lat_0=13 +lon_0=-157 +x_0=0 +y_0=0 +ellps=GRS80 +datum=NAD83 +units=m +no_defs"
+## North Atlantic ocean (Azores):
+nao.csy = "+proj=utm +zone=26 +ellps=intl +towgs84=-104,167,-38,0,0,0,0 +units=m +no_defs"
+## South Pacific Ocean:
+poly.csy = "+proj=aea +lat_1=-20 +lat_2=-60 +lat_0=-42 +lon_0=-155 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
+## Antartic land:
+anta.csy = "+proj=utm +zone=42 +south +ellps=intl +towgs84=145,-187,103,0,0,0,0 +units=m +no_defs"
 
 ## bounding boxes:
-continents <- data.frame(conts = c("au", "af", "sas", "nas", "eu", "na", "sa", "ant", "art"), xmin=c(-5013000, -4739000, -10733000, -4191000, 2426000, -4792000, -4013000, -2963000, -2963000), 
-xmax=c(5946000, 4090000, 1454000, 4096000, 7294000, 3353000, 3289000, 2983000, 2983000), ymin=c(-6420000, -4394000, 961000, 316000, 1428000, -1856000, -3380000, -2708000, -2708000), 
-ymax=c(600000, 3741000, 9400000, 5966000, 5447000, 5753000, 5780000, 2524000, 2524000), csy = c(au.csy, af.csy, sas.csy, nas.csy, eu.csy, na.csy, sa.csy, ant.csy, art.csy))
+conts = c("au", "af", "sas", "nas", "eu", "na", "sa", "ant", "art", "npo", "nao", "poly", "anta")
+xmin = c(-5013000, -5090000, -10733000, -4191000, 2426000, -4792000, -4013000, -2963000, -2963000, -2404000, 89000, -2357000, -1958000)
+xmax = c(5946000, 4470000, 1454000, 4096000, 7294000, 3353000, 3289000, 2983000, 2983000, 451000, 768000, 4439000, 1029000)
+ymin = c(-6420000, -4616000, 961000, 316000, 1428000, -1856000, -3380000, -2708000, -2708000, -1392000, 4041000, 1044000, 3963000)
+ymax = c(600000, 4004000, 9400000, 5966000, 5447000, 5753000, 5780000, 2524000, 2524000, 1950000, 4426000, 4246000, 4951000)
+csy = c(au.csy, af.csy, sas.csy, nas.csy, eu.csy, na.csy, sa.csy, ant.csy, art.csy, npo.csy, nao.csy, poly.csy, anta.csy)
+continents <- data.frame(conts, xmin, xmax, ymin, ymax, csy)
 save(continents, file="continents.rda")
 
+## tile and reproject land mask and DEM per continent:
+for(j in 1:nrow(continents)){
+  if(is.na(file.info(paste(continents[j,"conts"], '_LMTGSH3a.tif', sep=""))$size)){
+    system(paste(gdalwarp, ' LMTGSH3a.tif -t_srs \"', continents[j,"csy"], '\" ', continents[j,"conts"], '_LMTGSH3a.tif -ot Byte -r near -te ', continents[j,"xmin"],' ', continents[j,"ymin"],' ', continents[j,"xmax"],' ', continents[j,"ymax"], ' -tr 1000 1000', sep=""))
+  }
+}
 
+## Some pixels close to longitudes 180 / -180, and latitudes 90 / -90 get messed up and need to be fixed manually:
+#land.art <- readGDAL("art_lmtgsh3a.mpr")
+#names(land.art) = "mask"
+#land.art$mask <- ifelse(land.art$mask==129, NA, land.art$mask)
+#save(land.art, file="land.art.rda", compress="xz")
+#writeGDAL(land.art, "art_LMTGSH3a.tif", type="Byte", mvFlag=129)
 
+## The output maps are at:
+#http://worldgrids.org/lib/exe/fetch.php?media=continents1km.zip
 
 # end of script;

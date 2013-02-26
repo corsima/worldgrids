@@ -20,9 +20,9 @@ si <- Sys.info()
 outdir <- "G:/WORLDGRIDS/maps"
 
 ## download landmask and global DEM:
-if(is.na(file.info("DEMSRE3a.tif")$size)){
-  download.file("http://worldgrids.org/lib/exe/fetch.php?media=lmtgsh3a.tif.gz", "lmtgsh3a.tif.gz")
-  system(paste("7za e lmtgsh3a.tif.gz"))
+if(is.na(file.info("DEMSRE3a.tif")$size)|is.na(file.info("continents1km.zip")$size)){
+  download.file("http://worldgrids.org/lib/exe/fetch.php?media=continents1km.zip", "continents1km.zip")
+  system(paste("7za e continents1km.zip"))
   download.file("http://worldgrids.org/maps/DEMSRE3a.tif.gz", "DEMSRE3a.tif.gz")
   system(paste("7za e DEMSRE3a.tif.gz"))
 }
@@ -31,7 +31,6 @@ load("continents.rda")
 ## tile and reproject land mask and DEM per continent:
 for(j in 1:nrow(continents)){
   if(is.na(file.info(paste(continents[j,"conts"], '_DEMSRE3a.sdat', sep=""))$size)){
-    system(paste(gdalwarp, ' LMTGSH3a.tif -t_srs \"', continents[j,"csy"], '\" ', continents[j,"conts"], '_LMTGSH3a.tif -ot Byte -r near -te ', continents[j,"xmin"],' ', continents[j,"ymin"],' ', continents[j,"xmax"],' ', continents[j,"ymax"], ' -tr 1000 1000', sep=""))
     system(paste(gdalwarp, ' DEMSRE3a.tif -t_srs \"', continents[j,"csy"], '\" ', continents[j,"conts"], '_DEMSRE3a.sdat -ot Int16 -of \"SAGA\" -r bilinear -te ', continents[j,"xmin"],' ', continents[j,"ymin"],' ', continents[j,"xmax"],' ', continents[j,"ymax"], ' -tr 1000 1000', sep=""))
   }
 }
