@@ -44,7 +44,7 @@ for(j in 1:nrow(continents)){
 
 ## mask out land areas and resample back to geographical coordinates:
 for(j in 1:nrow(continents)){
-  if(is.na(file.info(paste(continents[j,"conts"], '_TWISRE3a_ll.tif', sep=""))$size)){
+  if(is.na(file.info(paste(continents[j,"conts"], '_TWISRE3a_ll.sdat', sep=""))$size)){
   unlink("tmp.tif")
   x = readGDAL(paste(continents[j,"conts"], '_LMTGSH3a.tif', sep=""))
   x$TWI <- readGDAL(paste(continents[j,"conts"], '_TWISRE3a.sdat', sep=""))$band1
@@ -52,7 +52,7 @@ for(j in 1:nrow(continents)){
   writeGDAL(x["TWI"], "tmp.tif", mvFlag=-99999)
   ## back-transform to geo coordinates:
   unlink(paste(continents[j,"conts"], '_TWISRE3a_ll.sdat', sep=""))
-  if(j==5){
+  if(continents[j,"conts"]=="eu"){
     system(paste(gdalwarp, ' tmp.tif ', continents[j,"conts"], '_TWISRE3a_ll.tif -r cubic -dstnodata \"-99999\" -s_srs \"', continents[j,"csy"],'\" -t_srs \"+proj=longlat +datum=WGS84\" -tr ', 1/120,' ', 1/120, sep=""))
   } else {
     system(paste(gdalwarp, ' tmp.tif ', continents[j,"conts"], '_TWISRE3a_ll.tif -r near -dstnodata \"-99999\" -s_srs \"', continents[j,"csy"],'\" -t_srs \"+proj=longlat +datum=WGS84\" -tr ', 1/120,' ', 1/120, sep=""))
@@ -62,13 +62,18 @@ for(j in 1:nrow(continents)){
 
 ## convert to SAGA GIS format:
 for(j in 1:nrow(continents)){
+  if(is.na(file.info(paste(continents[j,"conts"], '_TWISRE3a_ll.sdat', sep=""))$size)){
   system(paste(gdal_translate, ' ', continents[j,"conts"], '_TWISRE3a_ll.tif ', continents[j,"conts"], '_TWISRE3a_ll.sdat -a_nodata 0 -of \"SAGA\"', sep=""))
-  unlink(paste(continents[j,"conts"], '_TWISRE3a_ll.tif', sep=""))
+  #unlink(paste(continents[j,"conts"], '_TWISRE3a_ll.tif', sep=""))
+  }
 }
 
 ## merge maps: 
 TWI.sgrd.list <- paste(continents$conts, "_TWISRE3a_ll.sgrd", sep="", collapse=";")
 rsaga.geoprocessor(lib="grid_tools", module=3, param=list(GRIDS=TWI.sgrd.list, MERGED="TWISRE3a.sgrd", TYPE=7, INTERPOL=1, OVERLAP=0, MERGE_INFO_MESH_SIZE=1/120))
+
+## filter missing pixels (due to reprojection problems)!
+
 
 # convert to geotifs (1 km):
 system(paste(gdalwarp, ' TWISRE3a.sgrd -t_srs \"+proj=longlat +datum=WGS84\" -dstnodata \"-99999\" TWISRE3a.tif -r near -te -180 -90 180 90 -tr ', 1/120,' ', 1/120, sep=""))
