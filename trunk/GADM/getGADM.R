@@ -151,7 +151,7 @@ for(j in 1:nrow(continents)){
 #land.art <- readGDAL("art_lmtgsh3a.mpr")
 #names(land.art) = "mask"
 #land.art$mask <- ifelse(land.art$mask==129, NA, land.art$mask)
-#save(land.art, file="land.art.rda", compress="xz")
+##save(land.art, file="land.art.rda", compress="xz")
 #writeGDAL(land.art, "art_LMTGSH3a.tif", type="Byte", mvFlag=129)
 
 ## The output maps are at:
