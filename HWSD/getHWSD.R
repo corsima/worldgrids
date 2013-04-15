@@ -3,7 +3,7 @@
 # reference     : [https://code.google.com/p/worldgrids/source/browse/]
 # producer      : Prepared by T. Hengl
 # version       : 1
-# last update   : In Wageningen, NL, August 2012.
+# address       : In Wageningen, NL.
 # inputs        : data available for download from [http://www.iiasa.ac.at/Research/LUC/External-World-soil-database/HTML/]; 
 # outputs       : geotiff images projected in the "+proj=longlat +ellps=WGS84" system;
 # remarks 1     : First download and install SAGA GIS [http://www.saga-gis.org] and FWtools [http://fwtools.maptools.org];  
