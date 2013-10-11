@@ -12,6 +12,7 @@
 ## 1. GENERAL SETTINGS:
 library(rgdal)
 library(raster)
+library(RSAGA)
 # library(modis)
 fw.path <- utils::readRegistry("SOFTWARE\\WOW6432NODE\\FWTools")$Install_Dir
 gdalwarp <- shQuote(shortPathName(normalizePath(file.path(fw.path, "bin/gdalwarp.exe"))))
@@ -42,7 +43,7 @@ system(paste(gdalinfo, strsplit(outname, ".gz")[[1]]))
 ## 3. CREATE A MOSAIC AND RESAMPLE TO VARIOUS RESOLUTIONS:
 
 ## list all individual images and replace the values :(
-tif.lst <- list.files(pattern="*.tif$")
+tif.lst <- list.files(pattern=glob2rx("MOD44W_Water_2000_*.tif$"))
 fun <- function(x) { x[is.na(x)] <- 0; x <- x*100; return(x)}
 for(j in 1:length(tif.lst)){
   g <- GDALinfo(tif.lst[j])
@@ -52,18 +53,37 @@ for(j in 1:length(tif.lst)){
     writeRaster(r2, tif.lst[j], overwrite=TRUE)
   }
 } ## takes ca. 120 minutes!
+system(paste(gdalinfo, tif.lst[16]))
+
+## resample each file to 1 km res:
+for(j in 1:length(tif.lst)){
+  out1km <- paste(strsplit(tif.lst[j], ".tif")[[1]][1], "_1km.tif", sep="")
+  if(is.na(file.info(out1km)$size)){
+    system(paste(gdalwarp, ' ', tif.lst[j], ' ', out1km, ' -t_srs \"', crs, '\" -r bilinear -ot \"Byte\" -dstnodata 255 -tr ', 1/120,' ', 1/120, sep=""), show.output.on.console = TRUE)
+  }
+} ## takes 3-4 mins...
+
+tif2.lst <- list.files(pattern=glob2rx("MOD44W_Water_2000_*_1km.tif$"))
+unlink("my_liste.txt")
+cat(tif2.lst, file="my_liste.txt", fill=TRUE, append=TRUE)
 
 ## generate a VRT (virtual mosaic):
-system(paste(gdalbuildvrt, "MOD44W.vrt *.tif"))
+system(paste(gdalbuildvrt, "-input_file_list my_liste.txt MOD44W.vrt"))
+system(paste(gdalinfo, "MOD44W.vrt"))
 ## Create a mosaick:
 #unlink("WMKMOD5a.tif")
 #system(paste(gdalwarp, ' MOD44W.vrt WMKMOD5a.tif -t_srs \"', crs, '\" -srcnodata 0 -dstnodata -9999 -ot \"Int16\" -r near -te -180 -90 180 90 -tr ', 1/480,' ', 1/480, sep=""))  ## 5 MINS
 unlink("WMKMOD3a.tif")
-system(paste(gdalwarp, ' MOD44W.vrt WMKMOD3a.tif -t_srs \"', crs, '\" -r bilinear -ot \"Byte\" -dstnodata 255 -te -180 -90 180 90 -tr ', 1/120,' ', 1/120, sep=""), show.output.on.console = TRUE)  ## 5 MINS
-system(paste(gdalwarp, ' WMKMOD3a.tif WMKMOD2a.tif -t_srs \"', crs, '\" -r bilinear -ot \"Byte\" -dstnodata 255 -te -180 -90 180 90 -tr ', 1/40,' ', 1/40, sep=""))
-system(paste(gdalwarp, ' WMKMOD3a.tif WMKMOD1a.tif -t_srs \"', crs, '\" -r bilinear -ot \"Byte\" -dstnodata 255 -te -180 -90 180 90 -tr ', 1/20,' ', 1/20, sep=""))
-system(paste(gdalwarp, ' WMKMOD3a.tif WMKMOD0a.tif -t_srs \"', crs, '\" -r bilinear -ot \"Byte\" -dstnodata 255 -te -180 -90 180 90 -tr ', 1/5,' ', 1/5, sep=""))
-system(paste(gdalwarp, ' WMKMOD3a.tif wmask.tif -t_srs \"', crs, '\" -r bilinear -ot \"Byte\" -dstnodata 255 -te -180 -90 180 90 -tr ', 1,' ', 1, sep=""))
+#system(paste(gdalwarp, ' MOD44W.vrt WMKMOD3a.tif -t_srs \"', crs, '\" -r near -ot \"Byte\" -dstnodata 255 -te -180 -90 180 90 -tr ', 1/120,' ', 1/120, sep=""), show.output.on.console = TRUE)  ## 5 MINS
+system(paste(gdalwarp, ' MOD44W_Mosaic.sdat WMKMOD3a.tif -t_srs \"', crs, '\" -r near -ot \"Byte\" -dstnodata 255 -te -180 -90 180 90 -tr ', 1/120,' ', 1/120, sep=""), show.output.on.console = TRUE)  ## 5 MINS
+unlink("WMKMOD2a.tif")
+system(paste(gdalwarp, ' MOD44W_Mosaic.sdat WMKMOD2a.tif -t_srs \"', crs, '\" -r bilinear -ot \"Byte\" -dstnodata 255 -te -180 -90 180 90 -tr ', 1/40,' ', 1/40, sep=""))
+unlink("WMKMOD1a.tif")
+system(paste(gdalwarp, ' MOD44W_Mosaic.sdat WMKMOD1a.tif -t_srs \"', crs, '\" -r bilinear -ot \"Byte\" -dstnodata 255 -te -180 -90 180 90 -tr ', 1/20,' ', 1/20, sep=""))
+unlink("WMKMOD0a.tif")
+system(paste(gdalwarp, ' MOD44W_Mosaic.sdat WMKMOD0a.tif -t_srs \"', crs, '\" -r bilinear -ot \"Byte\" -dstnodata 255 -te -180 -90 180 90 -tr ', 1/5,' ', 1/5, sep=""))
+unlink("wmask.tif")
+system(paste(gdalwarp, ' MOD44W_Mosaic.sdat wmask.tif -t_srs \"', crs, '\" -r bilinear -ot \"Byte\" -dstnodata 255 -te -180 -90 180 90 -tr ', 1,' ', 1, sep=""))
 
 
 ## Zip the output files:
