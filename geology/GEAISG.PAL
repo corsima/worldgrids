@@ -1,0 +1,92 @@
+1 Archean 204 176 166
+2 Archean, Permian 180 176 166
+3 Cambrian 246 172 149
+4 Cambrian, Precambrian 240 172 149
+5 Cambrian, Proterozoic 240 178 149
+6 Carboniferous 162 174 199
+7 Carboniferous, Devonian 219 211 231
+8 Carboniferous, Miocene 160 180 200
+9 Cenozoic 255 235 179
+10 Cenozoic, Mesozoic 250 235 179
+11 Cretaceous 200 225 171
+12 Cretaceous, Carboniferous 204 235 235
+13 Cretaceous, Devonian 200 235 235
+14 Cretaceous, Jurassic 200 227 205
+15 Cretaceous, Mississippian 200 220 200
+16 Cretaceous, Paleogene, Neogene 200 215 201
+17 Cretaceous, Permian 205 201 202
+18 Cretaceous, Tertiary 242 245 207
+19 Cretaceous, Triassic 240 245 207
+20 Devonian 144 139 191
+21 Devonian, Cambrian 140 180 191
+22 Devonian, Ordovician 144 139 200
+23 Devonian, Proterozoic 140 152 191
+24 Devonian, Silurian 218 195 219
+25 Devonian, Silurian, Ordovician 217 190 210
+26 Holocene 15 15 15
+27 Ice 254 255 255
+28 Jurassic 132 199 169
+29 Jurassic, Cambrian 132 190 160
+30 Jurassic, Carboniferous 179 235 235
+31 Jurassic, Devonian 178 220 220
+32 Jurassic, Mississippian 180 245 235
+33 Jurassic, Ordovician 179 200 225
+34 Jurassic, Permian 200 198 235
+35 Jurassic, Triassic 180 220 219
+36 Kimberlite 160 160 160
+37 Mesozoic 159 194 177
+38 Mesozoic, Cenozoic 160 185 180
+39 Mesozoic, Paleozoic 230 199 194
+40 Mesozoic, Palezoic 231 199 194
+41 Miocene 152 255 25
+42 Mississippian 155 250 25
+43 Mississippian, Cambrian 156 200 125
+44 Mississippian, Devonian 157 225 24
+45 Neogene 253 237 146
+46 Neogene, Paleogene 250 237 146
+47 Ordovician 247 174 198
+48 Ordovician, Cambrian 251 207 196
+49 Ordovician, Proterozoic 250 205 190
+50 Paleogene 243 227 195
+51 Paleogene, Cretaceous 240 227 195
+52 Paleozoic 199 173 198
+53 Paleozoic, Mesozoic 199 170 198
+54 Paleozoic, Precambrian 205 175 199
+55 Paleozoic, Proterozoic 204 180 199
+56 Pennsylvanian 206 182 205
+57 Pennsylvanian, Devonian 205 182 204
+58 Pennsylvanian, Mississippian 201 180 201
+59 Permian 133 196 230
+60 Permian, Carboniferous 179 255 255
+61 Permian, Devonian 179 250 255
+62 Permian, Mississippian 170 241 235
+63 Permian, Pennsylvanian 165 240 225
+64 Permian, Triassic 178 241 224
+65 Pleistocene 255 235 102
+66 Pliocene, Quaternary 114 116 23
+67 Precambrian 204 179 175
+68 Precambrian, Devonian 203 180 175
+69 Precambrian, Paleozoic 201 201 202
+70 Proterozoic 206 193 159
+71 Proterozoic, Archean 204 193 159
+72 Quaternary 255 251 207
+73 Quaternary, Neogne 255 250 206
+74 Quaternary, Tertiary 255 249 200
+75 Salt 115 38 0
+76 Silurian 240 195 215
+77 Silurian, Cambrian 248 195 211
+78 Silurian, Ordovician 248 193 217
+79 Silurian, Proterozoic 248 192 217
+80 Tertiary 245 201 0
+81 Tertiary, Cretaceous 242 245 207
+82 Triassic 153 255 204
+83 Triassic, Carboniferous 155 255 203
+84 Triassic, Devonian 154 255 204
+85 Triassic, Mississippian 150 255 201
+86 Triassic, Ordovician 149 254 204
+87 Triassic, Paleozoic 147 255 199
+88 Triassic, Pennsylvanian 145 255 188
+89 Triassic, Permian 201 230 250
+90 Triassic, Proterozoic 204 255 250
+91 Unknown 245 245 245
+92 Water 151 219 242
