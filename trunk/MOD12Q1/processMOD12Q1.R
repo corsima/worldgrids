@@ -132,11 +132,6 @@ for(i in 1:16){
   rsaga.geoprocessor(lib="grid_tools", module=3, param=list(GRIDS=paste(lst.mos, collapse=";"), TYPE=1, INTERPOL=0, OVERLAP=0, TARGET=0, USER_XMIN=-180+(1/120)/2, USER_XMAX=180-(1/120)/2, USER_YMIN=-90+(1/120)/2, USER_YMAX=90-(1/120)/2, USER_SIZE=1/120, USER_GRID="mos.sgrd"), env=myenv, show.output.on.console = FALSE)
   ## resample:
   system(paste(gdal_translate, ' mos.sdat ', 'L', cln, 'IGB3a.tif -a_srs \"+proj=longlat +datum=WGS84\" -ot \"Byte\" -a_nodata \"255\"', sep=""))
-  ## clean up:
-  unlink(paste("L",cln,"IGB3a_*.sdat", sep=""))  
-  unlink(paste("L",cln,"IGB3a_*.sgrd", sep=""))
-  unlink(paste("L",cln,"IGB3a_*.mgrd", sep=""))
-  #unlink(paste("mos.*"))
 }
 }
 
@@ -171,5 +166,14 @@ for(k in 1:length(l.lst)){
     system(paste("xcopy", set.file.extension(outname, ".tif.gz"), shortPathName(normalizePath(outdir)))) 
     unlink(set.file.extension(outname, ".tif.gz"))
 }}
+
+
+## clean up:
+unlink("glc_20**_**_**.***")
+unlink("L**IGB3a_**.***")
+unlink("glc_20**_**.***")
+unlink("L**IGB3a_*.***")  
+unlink("mos.***")
+unlink("*.xml")
 
 ## end of script;
