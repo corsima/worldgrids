@@ -1,0 +1,8 @@
+L01IGB3a_1.sdat L01IGB3a_10.sdat L01IGB3a_11.sdat 
+L01IGB3a_12.sdat L01IGB3a_13.sdat L01IGB3a_14.sdat 
+L01IGB3a_15.sdat L01IGB3a_16.sdat L01IGB3a_17.sdat 
+L01IGB3a_18.sdat L01IGB3a_19.sdat L01IGB3a_2.sdat 
+L01IGB3a_20.sdat L01IGB3a_21.sdat L01IGB3a_22.sdat 
+L01IGB3a_23.sdat L01IGB3a_24.sdat L01IGB3a_3.sdat 
+L01IGB3a_4.sdat L01IGB3a_5.sdat L01IGB3a_6.sdat 
+L01IGB3a_7.sdat L01IGB3a_8.sdat L01IGB3a_9.sdat

@@ -1,4 +1,3 @@
-
 # title         : getNEO.R
 # purpose       : download and resampling of MODIS Leaf Area Index 0.1 arcdegree Monthly images;
 # reference     : [https://code.google.com/p/worldgrids/source/browse/]
