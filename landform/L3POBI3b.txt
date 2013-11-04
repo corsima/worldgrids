@@ -1,0 +1,9 @@
+COLOR	NAME	DESCRIPTION	MINIMUM	MAXIMUM
+7648371	flat plains	CL1	0.1	1.1
+8163529	high hills	CL2	1.1	2.1
+13553358	high mountains	CL3	2.1	3.1
+8572604	irregular plains	CL4	3.1	4.1
+12169442	low mountains	CL5	4.1	5.1
+9493493	rough low hills	CL6	5.1	6.1
+10481140	smooth low hills	CL7	6.1	7.1
+8435176	tablelands	CL8	7.1	8.1
