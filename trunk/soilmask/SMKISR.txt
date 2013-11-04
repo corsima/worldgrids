@@ -1,0 +1,4 @@
+COLOR	NAME	DESCRIPTION	MINIMUM	MAXIMUM
+1571890	soils with vegetation cover	CL1	0.1	1.1
+460786	urban areas	CL2	1.1	2.1
+12763842	bare soil areas	CL3	2.1	3.1
