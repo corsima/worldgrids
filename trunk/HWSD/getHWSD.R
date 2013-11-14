@@ -1,5 +1,5 @@
 # title         : getHWSD.R
-# purpose       : download and resampling of the Harmonized World Soil DB (FAO Soil map of the World);
+# purpose       : download and resampling of the Harmonized World Soil DB 7 March, 2012 - Version 1.21  (FAO Soil map of the World);
 # reference     : [https://code.google.com/p/worldgrids/source/browse/]
 # producer      : Prepared by T. Hengl
 # version       : 1
@@ -17,25 +17,45 @@
 
 library(RODBC)
 library(rgdal)
+library(GSIF)
+library(RSAGA)
+library(snowfall)
 fw.path = utils::readRegistry("SOFTWARE\\WOW6432Node\\FWTools")$Install_Dir
 gdalwarp = shQuote(shortPathName(normalizePath(file.path(fw.path, "bin/gdalwarp.exe"))))
+gdalbuildvrt <- shQuote(shortPathName(normalizePath(file.path(fw.path, "bin/gdalbuildvrt.exe"))))
 download.file("http://downloads.sourceforge.net/project/sevenzip/7-Zip/9.20/7za920.zip", destfile=paste(getwd(), "/", "7za920.zip", sep="")) 
 unzip("7za920.zip")
+outdir <- "G:/WORLDGRIDS/maps"
 
 # donwload the raster image and the DB:
-download.file("http://www.iiasa.ac.at/Research/LUC/External-World-soil-database/HWSD_Data/HWSD_RASTER.zip", destfile=paste(getwd(), "HWSD_RASTER.zip", sep="/"))
+download.file("http://webarchive.iiasa.ac.at/Research/LUC/External-World-soil-database/HWSD_Data/HWSD_RASTER.zip", destfile=paste(getwd(), "HWSD_RASTER.zip", sep="/"))
 unzip(zipfile="HWSD_RASTER.zip", exdir=getwd()) # 1.5 GB image!!
-download.file("http://www.iiasa.ac.at/Research/LUC/External-World-soil-database/HWSD_Data/HWSD.mdb", destfile=paste(getwd(), "HWSD.mdb", sep="/"))  
-download.file("http://www.iiasa.ac.at/Research/LUC/External-World-soil-database/HWSD_Data/HWSD_META.mdb", destfile=paste(getwd(), "HWSD_META.mdb", sep="/"))
+download.file("http://webarchive.iiasa.ac.at/Research/LUC/External-World-soil-database/HWSD_Data/HWSD.mdb", destfile=paste(getwd(), "HWSD.mdb", sep="/"))  
+download.file("http://webarchive.iiasa.ac.at/Research/LUC/External-World-soil-database/HWSD_Data/HWSD_META.mdb", destfile=paste(getwd(), "HWSD_META.mdb", sep="/"))
 
-# resample map to 10 km resolution:
+
+## download soil mask:
+download.file("http://worldgrids.org/lib/exe/fetch.php?media=smkisr3a.tif.gz", destfile=paste(getwd(), "/", "smkisr3a.tif.gz", sep=""))
+system("7za e smkisr3a.tif.gz")
+GDALinfo("hwsd.bil")
+
+## tiling system:
+grd <- GDALinfo("SMKISR3a.tif")
+tiles <- getSpatialTiles(grd, block.x=30, block.y=30)
+str(tiles)
+
 unlink("hwsd.tif")
-system(paste(gdalwarp, ' hwsd.bil -s_srs \"+proj=longlat +ellps=WGS84\" -t_srs \"+proj=longlat +ellps=WGS84\" hwsd.tif -r near -te -180 -90 180 90 -tr 0.05 0.05', sep=""))
-unlink("hwsd.bil")
+for(j in 1:nrow(tiles)){
+  ## tile HWSD map:
+  HWSDtile <- paste("hwsd_T", j, ".sdat", sep="")
+  if(is.na(file.info(HWSDtile)$size)){
+    system(paste(gdalwarp, ' hwsd.bil ', HWSDtile, ' -s_srs \"+proj=longlat +ellps=WGS84\" -t_srs \"+proj=longlat +ellps=WGS84\" -of \"SAGA\" -srcnodata 0 -dstnodata 65535 -r near -te ', tiles[j,"xl"] , ' ', tiles[j,"yl"], ' ', tiles[j,"xu"] ,' ', tiles[j,"yu"] ,' -tr ', 1/120, ' ', 1/120, sep=""))
+  }
+}
 
-# ------------------------------------------------------------
-# generate a soil-type HWSD map of the world:
-# ------------------------------------------------------------
+## resample also to 5 km resolution:
+system(paste(gdalwarp, " hwsd.bil -t_srs \"+proj=longlat +ellps=WGS84\" hwsd.tif -ot \"Byte\" -dstnodata 0 -r near -te -180 -90 180 90 -tr 0.05 0.05"))
+unlink("hwsd.bil")
 
 ## import the HWSD database to R:
 cHWSD <- odbcConnect(dsn="HWSD")
@@ -52,53 +72,22 @@ HWSD.SMU$MU_GLOBALc <- as.factor(HWSD.SMU$MU_GLOBAL)
 HWSD.SMU$newclass <- as.integer(HWSD.SMU$SU_SYMBOL)
 write.table(HWSD.SMU[,c("MU_GLOBAL", "newclass")], "class_SMU.txt", sep = "\t", quote=FALSE, row.names=FALSE)
 
-HWSDRaster <- readGDAL("hwsd.tif")
-# mask the water bodies (the NA values are actually "65534"):
-HWSDRaster$band1 <- ifelse(HWSDRaster$band1==0, NA, HWSDRaster$band1)
-# summary(HWSDRaster)
-names(HWSDRaster) <- "MU_GLOBAL"
-HWSDRaster <- as(HWSDRaster, "SpatialPixelsDataFrame")
-gc()
-
-# convert to table data:
-HWSDRaster.pnt <- data.frame(HWSDRaster)
-gc()
-HWSDRaster.pnt$MU_GLOBAL <- as.factor(HWSDRaster.pnt$MU_GLOBAL)
-## 6Mil pixels at 5 km
-gc()
-HWSDRaster.SMU <- merge(x=HWSD.SMU, y=HWSDRaster.pnt, all.y=TRUE, all.x=FALSE, by="MU_GLOBAL")  # takes time and RAM!
-# HWSDRaster.pntf <- subset(HWSDRaster.pnt, !is.na(HWSDRaster.pnt$x)&!is.na(HWSDRaster.pnt$y))
-coordinates(HWSDRaster.SMU) <- ~x+y
-gridded(HWSDRaster.SMU) <- TRUE
-# fullgrid(HWSDRaster.SMU) <- TRUE
-HWSDRaster.SMU$SU <- as.integer(HWSDRaster.SMU$SU_SYMBOL)
-HWSDRaster.SMU$MU <- as.integer(paste(HWSDRaster.SMU$MU_GLOBAL))
-writeGDAL(HWSDRaster.SMU["SU"], "HWSD_SMU.tif", "GTiff")
-## unique MUs:
-# writeGDAL(HWSDRaster.SMU["MU"], "HWSD_MU.tif", "GTiff")
-# resample to 5 km resolution:
-unlink("STGHWS1a.tif")
-system(paste(gdalwarp, "HWSD_SMU.tif -t_srs \"+proj=longlat +ellps=WGS84\" STGHWS1a.tif -ot \"Byte\" -dstnodata 0 -r near -te -180 -90 180 90 -tr 0.05 0.05"))
-GDALinfo("STGHWS1a.tif")
-# 20 km:
-system(paste(gdalwarp, "HWSD_SMU.tif -t_srs \"+proj=longlat +ellps=WGS84\" STGHWS0a.tif -ot \"Byte\" -dstnodata 0 -r near -te -180 -90 180 90 -tr 0.2 0.2"))
-unlink("HWSD_SMU.tif")
-
-## Compress and copy:
-for(outname in c("STGHWS0a.tif", "STGHWS1a.tif")){
-  if(is.na(file.info(paste(shortPathName(normalizePath(outdir)), paste(outname, "gz", sep="."), sep="\\"))$size)){
-  system(paste("7za a", "-tgzip", set.file.extension(outname, ".tif.gz"), outname))
-  system(paste("xcopy", set.file.extension(outname, ".tif.gz"), shortPathName(normalizePath(outdir)))) 
-  unlink(set.file.extension(outname, ".tif.gz"))
-}  # Compression takes > 15 mins
-}
-
-
-# get all attributes:
+## get all attributes:
 HWSD_DATA <- sqlFetch(cHWSD, "HWSD_DATA", na.strings=c("NA", "<NA>", ""))
 str(HWSD_DATA)
 ## test some summaries:
-# summary(HWSD_DATA$T_OC); summary(HWSD_DATA$T_CACO3); summary(HWSD_DATA$T_CASO4); summary(HWSD_DATA$T_CASO4)
+#summary(HWSD_DATA$T_OC); summary(HWSD_DATA$T_CACO3); summary(HWSD_DATA$T_CASO4); summary(HWSD_DATA$T_CASO4)
+
+## Fetch metadata
+HWSD_DATA.mt <- sqlColumns(cHWSD, "HWSD_DATA")  
+# description tables:
+mt.list <- tbl.list[grep(tbl.list, pattern="^D_")]
+HWSD.mt_list <- NULL
+for(j in 1:length(mt.list)){ HWSD.mt_list[[j]] <- sqlFetch(cHWSD, mt.list[j]) }
+
+# get metadata:
+HWSD_META <- sqlFetch(cHWSD_md, "HWSD_METADATA")
+str(HWSD_META)
 
 # Soil properties of interest:
 sv.list <- c("MU_GLOBAL", names(HWSD_DATA)[-c(1:13)])
@@ -118,8 +107,150 @@ HWSD_DATA$x <- 1/HWSD_DATA$SHARE
 # find the dominant class (highest percentage):
 rnk <- aggregate(. ~ MU_GLOBAL, HWSD_DATA[order(HWSD_DATA$MU_GLOBAL), c("MU_GLOBAL", "x")], FUN=rank, ties.method="first", na.action = na.pass)
 HWSD_DATA[order(HWSD_DATA$MU_GLOBAL),"x"] <- unlist(rnk$x)
-# str(HWSD_DATA)
+str(HWSD_DATA)
 ## 48148 values for 16327 MU_GLOBAL IDs, so the values need to be aggregated based on "SHARE";
+
+# ------------------------------------------------------------
+# generate percentage cover per each WRB soil type:
+# ------------------------------------------------------------
+
+## clean up classes:
+#write.csv(data.frame(number=1:length(levels(HWSD_DATA$SU_SYM74)), names=levels(HWSD_DATA$SU_SYM74)), "SU_SYM74.csv")
+#write.csv(data.frame(number=1:length(levels(HWSD_DATA$SU_SYM90)), names=levels(HWSD_DATA$SU_SYM90)), "SU_SYM90.csv")
+library(RCurl)
+# verify the certificate:
+curl <- getCurlHandle()
+options(RCurlOptions = list(capath = system.file("CurlSSL", "cacert.pem", package = "RCurl"), ssl.verifypeer = FALSE))
+curlSetOpt(.opts = list(proxy = 'proxyserver:port'), curl = curl)
+
+## HWSDB classification system:
+cat(getURL("https://docs.google.com/spreadsheet/pub?key=0Ah5Ip0avaTkLdG54OU1STllDZnM2TEk5WXhvS21JdlE&single=true&gid=0&output=csv"), file = "WRBtbl.csv")
+WRB.tbl <- read.csv("WRBtbl.csv", na.strings = c("NA",""))
+
+cat(getURL("https://docs.google.com/spreadsheet/pub?key=0Ah5Ip0avaTkLdG54OU1STllDZnM2TEk5WXhvS21JdlE&single=true&gid=5&output=csv"), file = "cleanup_SU_SYM74.csv")
+cleanup_SU_SYM74 <- read.csv("cleanup_SU_SYM74.csv", na.strings = c("NA",""))
+str(cleanup_SU_SYM74)
+
+cat(getURL("https://docs.google.com/spreadsheet/pub?key=0Ah5Ip0avaTkLdG54OU1STllDZnM2TEk5WXhvS21JdlE&single=true&gid=6&output=csv"), file = "cleanup_SU_SYM90.csv")
+cleanup_SU_SYM90 <- read.csv("cleanup_SU_SYM90.csv", na.strings = c("NA",""))
+str(cleanup_SU_SYM90)
+
+WRB1 <- merge(HWSD_DATA[,c("MU_GLOBAL","SU_SYM74","SHARE")], cleanup_SU_SYM74[,c("names","Group")], by.x="SU_SYM74", by.y="names", all=FALSE)
+WRB2 <- merge(HWSD_DATA[,c("MU_GLOBAL","SU_SYM90","SHARE")], cleanup_SU_SYM90[,c("SYM90","Group")], by.x="SU_SYM90", by.y="SYM90", all=FALSE)
+WRB <- rbind(WRB1[,c("MU_GLOBAL","SHARE","Group")], WRB2[,c("MU_GLOBAL","SHARE","Group")])
+## some 100 MU_GLOBAL do not have a match... this can be ingored
+
+## merge per WRB group per tile:
+wrapper.HWSDtile <- function(i){
+  HWSDtile <- paste("hwsd_T", i, ".sdat", sep="")
+  HWSDRaster <- readGDAL(HWSDtile)
+  names(HWSDRaster) <- "MU_GLOBAL"
+  ## skip if empty set...
+ if(!all(is.na(HWSDRaster$MU_GLOBAL))){
+  HWSDRaster <- as(HWSDRaster, "SpatialPixelsDataFrame")
+  HWSDRaster$MU_GLOBAL <- as.factor(HWSDRaster$MU_GLOBAL)
+  HWSDRaster$index <- as.factor(HWSDRaster@grid.index)
+  ## takes time and RAM!!
+  gc()
+  ## check coverage for each class:
+  for(k in levels(WRB$Group)){
+    HWSDouttile <- paste("hwsd_T", i, "_", k, ".tif", sep="")   
+    if(!file.exists(HWSDouttile)){
+      HWSDRaster$SHARE <- NULL
+      sel <- WRB$Group == k & !is.na(WRB$Group)
+      x <- merge(x=HWSDRaster@data, y=WRB[sel,], all.x=TRUE, all.y=FALSE, by="MU_GLOBAL", sort=FALSE)
+      gc()
+      if(all(is.na(x$SHARE))){
+        HWSDRaster$SHARE <- 0
+      } else {
+        ## Some classes appear in the same MU_GLOBAL hence we need to aggregate!!
+        xa <- aggregate(x$SHARE, by=list(x$index), sum)
+        gc()
+        HWSDRaster@data[as.integer(xa$Group.1),"SHARE"] <- xa$x
+        HWSDRaster$SHARE <- ifelse(is.na(HWSDRaster$SHARE), 0, HWSDRaster$SHARE)
+      } 
+      writeGDAL(HWSDRaster["SHARE"], HWSDouttile, type="Byte", mvFlag=255, "GTiff")
+    }
+  }
+ }
+}
+
+sfInit(parallel=TRUE, cpus=6)
+sfLibrary(rgdal)
+sfLibrary(sp)
+
+## export all objects that are used in this function:
+sfExport("tiles", "WRB")
+system.time(x <- sfLapply(1:nrow(tiles), wrapper.HWSDtile))
+sfStop()
+
+## Create mosaics:
+for(k in levels(WRB$Group)){
+  tifout <- paste("G", WRB.tbl$Code[which(WRB.tbl$Group == k)], "HWS3a.tif", sep="")
+  if(!file.exists(tifout)){
+    ## list all tiles of specific class:
+    #tif.lst <- list.files(pattern=paste("hwsd_*_", k,".tif$"))
+    ## create a mosaic:
+    unlink("hwsd.vrt")
+    system(paste(gdalbuildvrt, " hwsd.vrt ", " hwsd_*_", k, ".tif", sep=""))
+    system(paste(gdalwarp, " hwsd.vrt ", tifout, " -ot \"Byte\" -dstnodata 255 -r near -te -180 -90 180 90 -tr ", 1/120," ", 1/120, sep=""), show.output.on.console = FALSE)
+  }
+}
+## check if everything is OK:
+GDALinfo("GACHWS3a.tif")
+
+## resample to various resolutions
+## create a mosaic and compress files:
+for(k in levels(WRB$Group)){
+  tifout <- paste("G", WRB.tbl$Code[which(WRB.tbl$Group == k)], "HWS3a.tif", sep="")
+  ## 2.5 km:
+  tifoutr <- paste("G", WRB.tbl$Code[which(WRB.tbl$Group == k)], "HWS2a.tif", sep="")
+  if(!file.exists(tifoutr)){
+    system(paste(gdalwarp, ' ', tifout, ' ', tifoutr, ' -dstnodata 255 -r bilinear -te -180 -90 180 90 -tr ', 1/40,' ', 1/40, sep=""))
+  }
+  ## 5 km:
+  tifoutr <- paste("G", WRB.tbl$Code[which(WRB.tbl$Group == k)], "HWS1a.tif", sep="")
+  if(!file.exists(tifoutr)){
+    system(paste(gdalwarp, ' ', tifout, ' ', tifoutr, ' -dstnodata 255 -r bilinear -te -180 -90 180 90 -tr ', 1/20,' ', 1/20, sep=""))
+  }
+  ## 20 km:
+  tifoutr <- paste("G", WRB.tbl$Code[which(WRB.tbl$Group == k)], "HWS0a.tif", sep="")  
+  if(!file.exists(tifoutr)){
+    system(paste(gdalwarp, ' ', tifout, ' ', tifoutr, ' -dstnodata 255 -r bilinear -te -180 -90 180 90 -tr ', 1/5,' ', 1/5, sep=""))
+  }
+}
+
+## compress:
+for(k in levels(WRB$Group)){  
+  tifoutr <- paste("G", WRB.tbl$Code[which(WRB.tbl$Group == k)], "HWS", sep="")
+  for(i in 0:3){
+    outname = paste(tifoutr, i, 'a', sep="")
+    system(paste("7za a", "-tgzip", set.file.extension(outname, ".tif.gz"), set.file.extension(outname, ".tif")))
+    system(paste("xcopy", set.file.extension(outname, ".tif.gz"), shortPathName(normalizePath(outdir)))) 
+    unlink(set.file.extension(outname, ".tif.gz"))
+  }
+}
+
+HWSDRaster <- readGDAL("hwsd.tif")
+# mask the water bodies (the NA values are actually "65534"):
+HWSDRaster$band1 <- ifelse(HWSDRaster$band1==0, NA, HWSDRaster$band1)
+# summary(HWSDRaster)
+names(HWSDRaster) <- "MU_GLOBAL"
+HWSDRaster <- as(HWSDRaster, "SpatialPixelsDataFrame")
+gc()
+
+# convert to table data:
+HWSDRaster.pnt <- data.frame(HWSDRaster)
+gc()
+HWSDRaster.pnt$MU_GLOBAL <- as.factor(HWSDRaster.pnt$MU_GLOBAL)
+HWSDRaster.SMU <- merge(x=HWSD.SMU, y=HWSDRaster.pnt, all.y=TRUE, all.x=FALSE, by="MU_GLOBAL")  # takes time and RAM!
+# HWSDRaster.pntf <- subset(HWSDRaster.pnt, !is.na(HWSDRaster.pnt$x)&!is.na(HWSDRaster.pnt$y))
+coordinates(HWSDRaster.SMU) <- ~x+y
+gridded(HWSDRaster.SMU) <- TRUE
+# fullgrid(HWSDRaster.SMU) <- TRUE
+HWSDRaster.SMU$SU <- as.integer(HWSDRaster.SMU$SU_SYMBOL)
+HWSDRaster.SMU$MU <- as.integer(paste(HWSDRaster.SMU$MU_GLOBAL))
+writeGDAL(HWSDRaster.SMU["SU"], "HWSD_SMU.tif", "GTiff")
 
 ## aggregate per MU (a weighted average):
 ## HIR: It would be also usefull to derive the dominant class?
@@ -218,16 +349,7 @@ for(outname in c(paste(outname.lst[-1], "1a.tif", sep=""), paste(outname.lst[-1]
 }
 
 
-## Fetch metadata
-HWSD_DATA.mt <- sqlColumns(cHWSD, "HWSD_DATA")  
-# description tables:
-mt.list <- tbl.list[grep(tbl.list, pattern="^D_")]
-HWSD.mt_list <- NULL
-for(j in 1:length(mt.list)){ HWSD.mt_list[[j]] <- sqlFetch(cHWSD, mt.list[j]) }
 
-# get metadata:
-HWSD_META <- sqlFetch(cHWSD_md, "HWSD_METADATA")
-str(HWSD_META)
 
 ## write attribute table and metadata:
 write.table(HWSD_DATA[,-1], "hwsdmu.csv", row.names=FALSE, sep=";", quote=FALSE)
