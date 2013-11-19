@@ -54,7 +54,7 @@ for(j in 1:nrow(tiles)){
 }
 
 ## resample also to 5 km resolution:
-system(paste(gdalwarp, " hwsd.bil -t_srs \"+proj=longlat +ellps=WGS84\" hwsd.tif -ot \"Byte\" -dstnodata 0 -r near -te -180 -90 180 90 -tr 0.05 0.05"))
+system(paste(gdalwarp, " hwsd.bil -t_srs \"+proj=longlat +ellps=WGS84\" hwsd.tif -r near -te -180 -90 180 90 -tr 0.05 0.05"))
 unlink("hwsd.bil")
 
 ## import the HWSD database to R:
@@ -200,7 +200,6 @@ for(k in levels(WRB$Group)){
 GDALinfo("GACHWS3a.tif")
 
 ## resample to various resolutions
-## create a mosaic and compress files:
 for(k in levels(WRB$Group)){
   tifout <- paste("G", WRB.tbl$Code[which(WRB.tbl$Group == k)], "HWS3a.tif", sep="")
   ## 2.5 km:
@@ -231,26 +230,47 @@ for(k in levels(WRB$Group)){
   }
 }
 
-HWSDRaster <- readGDAL("hwsd.tif")
+HWSDRaster5km <- readGDAL("hwsd.tif")
 # mask the water bodies (the NA values are actually "65534"):
-HWSDRaster$band1 <- ifelse(HWSDRaster$band1==0, NA, HWSDRaster$band1)
-# summary(HWSDRaster)
-names(HWSDRaster) <- "MU_GLOBAL"
-HWSDRaster <- as(HWSDRaster, "SpatialPixelsDataFrame")
+HWSDRaster5km$band1 <- ifelse(HWSDRaster5km$band1==0, NA, HWSDRaster5km$band1)
+summary(as.factor(HWSDRaster5km$band1))
+names(HWSDRaster5km) <- "MU_GLOBAL"
+HWSDRaster5km <- as(HWSDRaster5km, "SpatialPixelsDataFrame") ## 10 mins...
 gc()
 
 # convert to table data:
-HWSDRaster.pnt <- data.frame(HWSDRaster)
+HWSDRaster5km.pnt <- data.frame(HWSDRaster5km)
 gc()
-HWSDRaster.pnt$MU_GLOBAL <- as.factor(HWSDRaster.pnt$MU_GLOBAL)
-HWSDRaster.SMU <- merge(x=HWSD.SMU, y=HWSDRaster.pnt, all.y=TRUE, all.x=FALSE, by="MU_GLOBAL")  # takes time and RAM!
-# HWSDRaster.pntf <- subset(HWSDRaster.pnt, !is.na(HWSDRaster.pnt$x)&!is.na(HWSDRaster.pnt$y))
-coordinates(HWSDRaster.SMU) <- ~x+y
-gridded(HWSDRaster.SMU) <- TRUE
-# fullgrid(HWSDRaster.SMU) <- TRUE
-HWSDRaster.SMU$SU <- as.integer(HWSDRaster.SMU$SU_SYMBOL)
-HWSDRaster.SMU$MU <- as.integer(paste(HWSDRaster.SMU$MU_GLOBAL))
-writeGDAL(HWSDRaster.SMU["SU"], "HWSD_SMU.tif", "GTiff")
+HWSDRaster5km.pnt$MU_GLOBAL <- as.factor(HWSDRaster5km.pnt$MU_GLOBAL)
+HWSDRaster5km.SMU <- merge(x=HWSD.SMU, y=HWSDRaster5km.pnt, all.y=TRUE, all.x=FALSE, by="MU_GLOBAL")  # takes time and RAM!
+#HWSDRaster5km.pntf <- subset(HWSDRaster5km.pnt, !is.na(HWSDRaster5km.pnt$x)&!is.na(HWSDRaster5km.pnt$y))
+HWSDRaster5km.SMU$SU_SYMBOL <- as.character(HWSDRaster5km.SMU$SU_SYMBOL)
+coordinates(HWSDRaster5km.SMU) <- ~x+y
+gridded(HWSDRaster5km.SMU) <- TRUE
+#fullgrid(HWSDRaster5km.SMU) <- TRUE
+HWSDRaster5km.SMU$SU_SYMBOL <- ifelse(HWSDRaster5km.SMU$SU_SYMBOL=="Gl", "GL", HWSDRaster5km.SMU$SU_SYMBOL)
+HWSDRaster5km.SMU$SU_SYMBOL <- ifelse(HWSDRaster5km.SMU$SU_SYMBOL=="PD", "AB", HWSDRaster5km.SMU$SU_SYMBOL)
+HWSDRaster5km.SMU$SU_SYMBOL <- as.factor(HWSDRaster5km.SMU$SU_SYMBOL)
+summary(HWSDRaster5km.SMU$SU_SYMBOL)
+HWSDRaster5km.SMU$SU <- as.integer(HWSDRaster5km.SMU$SU_SYMBOL)
+HWSDRaster5km.SMU$MU <- as.integer(HWSDRaster5km.SMU$MU_GLOBAL)
+proj4string(HWSDRaster5km.SMU) <- HWSDRaster5km@proj4string
+unlink("HWSD_SMU.tif")
+writeGDAL(HWSDRaster5km.SMU["SU"], "HWSD_SMU.tif", mvFlag=-99999)
+
+## SAGA GIS legend:
+data(soil.legends)
+WRBf <- data.frame(Code=levels(HWSDRaster5km.SMU$SU_SYMBOL), levs=1:length(levels(HWSDRaster5km.SMU$SU_SYMBOL)))
+WRB.col <- merge(WRBf, soil.legends[["TAXGWRB"]], all.x=TRUE)
+WRB.col <- WRB.col[!is.na(WRB.col$COLOR),]
+unlink("STGHWS1.txt")
+makeSAGAlegend(x=WRB.col$Group, col_pal=WRB.col$COLOR, filename="STGHWS1.txt", MINIMUM=WRB.col$levs, MAXIMUM=WRB.col$levs+1)
+
+unlink("STGHWS1a.tif")
+system(paste(gdalwarp, ' HWSD_SMU.tif STGHWS1a.tif -dstnodata 255 -ot \"Byte\" -r near -te -180 -90 180 90 -tr 0.05 0.05', sep=""))
+unlink("STGHWS0a.tif")
+system(paste(gdalwarp, ' HWSD_SMU.tif STGHWS0a.tif -dstnodata 255 -ot \"Byte\" -r near -te -180 -90 180 90 -tr 0.2 0.2', sep=""))
+
 
 ## aggregate per MU (a weighted average):
 ## HIR: It would be also usefull to derive the dominant class?
@@ -278,7 +298,7 @@ HWSD_M$AWC_CLASS <- as.integer(round(HWSD_M$AWC_CLASS, 0))
 ## merge MU_GLOBAL and soil property of interest
 ## TH: This takes increadible 8GB of RAM!
 gc()
-HWSDRaster.DATA <- merge(x=HWSD_M[,sv.list], y=HWSDRaster.pnt, all.y=TRUE, all.x=FALSE, by="MU_GLOBAL")
+HWSDRaster.DATA <- merge(x=HWSD_M[,sv.list], y=HWSDRaster5km.pnt, all.y=TRUE, all.x=FALSE, by="MU_GLOBAL")
 gc()
 # convert to a spatial layer:
 coordinates(HWSDRaster.DATA) <- ~x+y
@@ -341,15 +361,14 @@ GDALinfo("TPHHWS1a.tif") # must be Float32 with -99999 mask
 
 ## Compress and copy:
 for(outname in c(paste(outname.lst[-1], "1a.tif", sep=""), paste(outname.lst[-1], "0a.tif", sep=""))){
+
+for(outname in c("STGHWS1a.tif", "STGHWS0a.tif")){
   if(is.na(file.info(paste(shortPathName(normalizePath(outdir)), paste(outname, "gz", sep="."), sep="\\"))$size)){
   system(paste("7za a", "-tgzip", set.file.extension(outname, ".tif.gz"), outname))
   system(paste("xcopy", set.file.extension(outname, ".tif.gz"), shortPathName(normalizePath(outdir)))) 
   unlink(set.file.extension(outname, ".tif.gz"))
 }  # Compression takes > 15 mins
 }
-
-
-
 
 ## write attribute table and metadata:
 write.table(HWSD_DATA[,-1], "hwsdmu.csv", row.names=FALSE, sep=";", quote=FALSE)
@@ -417,10 +436,6 @@ write.csv(HWSD_attr, "HWSD_attr.csv")
 # Save the R image:
 save(HWSD, file="HWSD.RData")
 # 4,241,944 pixels
-# http://globalsoilmap.net/data/HWSD.RData
-
-
-
 
 
 # end of script;
