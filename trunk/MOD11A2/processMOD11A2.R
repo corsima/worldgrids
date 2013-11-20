@@ -8,6 +8,7 @@
 # remarks 1     : First download and install FWtools [http://fwtools.maptools.org];
 
 library(rgdal)
+library(RSAGA)
 fw.path = utils::readRegistry("SOFTWARE\\WOW6432Node\\FWTools")$Install_Dir
 gdalwarp = shQuote(shortPathName(normalizePath(file.path(fw.path, "bin/gdalwarp.exe"))))
 gdal_translate = shQuote(shortPathName(normalizePath(file.path(fw.path, "bin/gdal_translate.exe"))))
@@ -26,6 +27,19 @@ str(tiles)
 ## list files:
 dtif.lst <- list.files(pattern=glob2rx("LST_Day_1km_*_*_*.tif$"))
 ntif.lst <- list.files(pattern=glob2rx("LST_Night_1km_*_*_*.tif$"))
+x <- as.numeric(sapply(dtif.lst, function(x){strsplit(x, "_")[[1]][5]}))
+monthtif.lst <- ifelse(x %in% c(12,1), "X1", ifelse(x %in% c(2,3), "X2", ifelse(x %in% c(4,5), "X3", ifelse(x %in% c(6,7), "X4", ifelse(x %in% c(8,9), "X5", "X6")))))
+
+download.file("http://worldgrids.org/lib/exe/fetch.php?media=smkisr3a.tif.gz", destfile=paste(getwd(), "/", "smkisr3a.tif.gz", sep=""))
+system("7za e smkisr3a.tif.gz")
+
+## land mask:
+for(j in 1:nrow(tiles)){
+  landtile <- paste("SMKISR3a_T", j, ".sdat", sep="")
+  if(is.na(file.info(landtile)$size)){
+    system(paste(gdalwarp, ' SMKISR3a.tif ', landtile, ' -of \"SAGA\" -srcnodata 0 -dstnodata \"-32767\" -ot Int16 -r near -te ', tiles[j,"lonmin"] , ' ', tiles[j,"latmin"], ' ', tiles[j,"lonmax"] ,' ', tiles[j,"latmax"] ,' -tr ', 1/120, ' ', 1/120, sep=""))
+  }
+}
 
 ## DAY TIME - derive principle components for each tile:
 for(j in 1:nrow(tiles)){
@@ -44,8 +58,30 @@ for(j in 1:nrow(tiles)){
   }
 }
 
-# create a mosaic and compress files:
-for(j in c("TDMMOD", "TDSMOD", "TDLMOD", "TDHMOD")){
+## Mean temperature for 6 seasons:
+for(j in 1:nrow(tiles)){
+  for(i in 1:length(dtif.lst)){
+    outname <- strsplit(dtif.lst[i], ".tif")[[1]][1]
+    tilename <- paste(outname, '_', j, '.sdat', sep="")
+    # resample
+    if(is.na(file.info(tilename)$size)){
+      system(paste(gdalwarp, ' ', dtif.lst[i], ' ', tilename, ' -of \"SAGA\" -dstnodata \"-32767\" -r near -te ', tiles[j,"lonmin"] , ' ', tiles[j,"latmin"], ' ', tiles[j,"lonmax"] ,' ', tiles[j,"latmax"] ,' -tr ', 1/120, ' ', 1/120, sep=""))
+    }
+  }
+  ## derive mean value per month:
+  t.lst <- list.files(pattern=glob2rx(paste('LST_Day_1km_*_*_*_', j, '.sgrd$', sep="")))
+  for(k in levels(as.factor(monthtif.lst))){
+    sel <- monthtif.lst %in% k
+    if(is.na(file.info(paste("T", k, "MOD3a_", j, ".sgrd", sep=""))$size)){
+      rsaga.geoprocessor(lib="geostatistics_grid", module=4, param=list(GRIDS=paste(t.lst[sel], collapse=";"), MEAN=paste("T", k, "MOD3a_", j, "_f.sgrd", sep=""))) ## , MIN="tmp.sgrd", MAX="tmp.sgrd", STDDEV="tmp.sgrd"
+      ## filter out all missing pixels...
+      rsaga.geoprocessor(lib="grid_tools", module=7, param=list(INPUT=paste("T", k, "MOD3a_", j, "_f.sgrd", sep=""), MASK=paste("SMKISR3a_T", j, ".sgrd", sep=""), RESULT=paste("T", k, "MOD3a_", j, ".sgrd", sep=""), THRESHOLD=.1))
+    }
+  }
+}
+
+## create a mosaic and compress files:
+for(j in c("TDMMOD", "TDSMOD", "TDLMOD", "TDHMOD", paste("TX", 1:6, "MOD", sep=""))){
   unlink("mod11a2.vrt")
   system(paste(gdalbuildvrt, "mod11a2.vrt", paste(j, "3a_", 1:nrow(tiles), ".sdat", sep="", collapse=" ")))
   # convert to geotif (1 km):
@@ -65,7 +101,7 @@ for(j in c("TDMMOD", "TDSMOD", "TDLMOD", "TDHMOD")){
 }
 
 ## compress:  
-for(j in c("TDMMOD", "TDSMOD", "TDLMOD", "TDHMOD")){
+for(j in c("TDMMOD", "TDSMOD", "TDLMOD", "TDHMOD", paste("TX", 1:6, "MOD", sep=""))){
 for(i in 0:3){
     outname = paste(j, i, 'a', sep="")
     system(paste("7za a", "-tgzip", set.file.extension(outname, ".tif.gz"), set.file.extension(outname, ".tif")))
@@ -77,7 +113,8 @@ for(i in 0:3){
 # clean up temp files:
 unlink(list.files(pattern=glob2rx("LST_Day_1km_*_*_*_*.*")))
 unlink(list.files(pattern=glob2rx("TD*MOD3a_*.*")))
-
+unlink(list.files(pattern=glob2rx("TX*MOD3a_*_f.*")))
+unlink(list.files(pattern=glob2rx("TX*MOD3a_*.*")))
 
 ## list files:
 ntif.lst <- list.files(pattern=glob2rx("LST_Night_1km_*_*_*.tif$"))
