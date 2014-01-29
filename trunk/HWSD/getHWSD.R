@@ -26,6 +26,8 @@ gdalbuildvrt <- shQuote(shortPathName(normalizePath(file.path(fw.path, "bin/gdal
 download.file("http://downloads.sourceforge.net/project/sevenzip/7-Zip/9.20/7za920.zip", destfile=paste(getwd(), "/", "7za920.zip", sep="")) 
 unzip("7za920.zip")
 outdir <- "G:/WORLDGRIDS/maps"
+download.file("http://worldgrids.org/rda/world_country.rda", "world_country.rda")
+load("world_country.rda")
 
 # donwload the raster image and the DB:
 download.file("http://webarchive.iiasa.ac.at/Research/LUC/External-World-soil-database/HWSD_Data/HWSD_RASTER.zip", destfile=paste(getwd(), "HWSD_RASTER.zip", sep="/"))
@@ -138,7 +140,8 @@ str(cleanup_SU_SYM90)
 WRB1 <- merge(HWSD_DATA[,c("MU_GLOBAL","SU_SYM74","SHARE")], cleanup_SU_SYM74[,c("names","Group")], by.x="SU_SYM74", by.y="names", all=FALSE)
 WRB2 <- merge(HWSD_DATA[,c("MU_GLOBAL","SU_SYM90","SHARE")], cleanup_SU_SYM90[,c("SYM90","Group")], by.x="SU_SYM90", by.y="SYM90", all=FALSE)
 WRB <- rbind(WRB1[,c("MU_GLOBAL","SHARE","Group")], WRB2[,c("MU_GLOBAL","SHARE","Group")])
-## some 100 MU_GLOBAL do not have a match... this can be ingored
+summary(WRB$Group)
+## some 620 MU_GLOBAL do not have a match... this can be ingored?!
 
 ## merge per WRB group per tile:
 wrapper.HWSDtile <- function(i){
@@ -230,6 +233,35 @@ for(k in levels(WRB$Group)){
   }
 }
 
+## plot PNGs for the website:
+makeWorldPNG <- function(tif, png.width=7200, png.height=png.width/2, pal, over.lines=world_country, mvFlag){
+  img <- readGDAL(tif)
+  if(!missing(mvFlag)){
+    img$band1 <- ifelse(img$band1==mvFlag, NA, img$band1)
+  }
+  ## plot the image
+  require(RSAGA)
+  raster_name = set.file.extension(tif, ".png")
+  png(filename = raster_name, bg = "transparent", type="cairo-png", width=png.width, height=png.height)
+  par(mar = c(0, 0, 0, 0), xaxs = "i", yaxs = "i")
+  raster::image(img[1], col = pal, frame.plot = FALSE, main="", zlim=c(0,100))
+  lines(over.lines, col="red")
+  #legend("left", legend=rev(class.labels), fill=rev(pal), cex=3)
+  dev.off()
+}
+
+library(plotKML)
+data(R_pal)
+for(k in levels(WRB$Group)){ 
+  fname <- paste("G", WRB.tbl$Code[which(WRB.tbl$Group == k)], "HWS1a.tif", sep="")
+  if(!file.exists(set.file.extension(fname, ".png"))){
+    makeWorldPNG(tif=fname, pal=R_pal[["grey_black"]])
+  }
+}
+
+
+
+## 5 km grids...
 HWSDRaster5km <- readGDAL("hwsd.tif")
 # mask the water bodies (the NA values are actually "65534"):
 HWSDRaster5km$band1 <- ifelse(HWSDRaster5km$band1==0, NA, HWSDRaster5km$band1)
@@ -262,6 +294,7 @@ writeGDAL(HWSDRaster5km.SMU["SU"], "HWSD_SMU.tif", mvFlag=-99999)
 data(soil.legends)
 WRBf <- data.frame(Code=levels(HWSDRaster5km.SMU$SU_SYMBOL), levs=1:length(levels(HWSDRaster5km.SMU$SU_SYMBOL)))
 WRB.col <- merge(WRBf, soil.legends[["TAXGWRB"]], all.x=TRUE)
+write.csv(WRB.col, file="HWSD_col.csv")
 WRB.col <- WRB.col[!is.na(WRB.col$COLOR),]
 unlink("STGHWS1.txt")
 makeSAGAlegend(x=WRB.col$Group, col_pal=WRB.col$COLOR, filename="STGHWS1.txt", MINIMUM=WRB.col$levs, MAXIMUM=WRB.col$levs+1)
