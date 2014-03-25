@@ -2,7 +2,7 @@
 # purpose       : processing of the MODIS 1 km resolution composites (intermadiate products);
 # reference     : [http://worldgrids.org]
 # producer      : Prepared by T. Hengl
-# last update   : In Wageningen, NL, Aug 2012.
+# address       : In Wageningen, NL.
 # inputs        : 1 km geotifs in the format "LST_Day_1km_*_*_*.tif" (global composites produced using FWTools);
 # outputs       : geotiff images projected in the "+proj=longlat +ellps=WGS84" system;
 # remarks 1     : First download and install FWtools [http://fwtools.maptools.org];
