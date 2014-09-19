@@ -85,6 +85,13 @@ system(paste(gdalwarp, ' MOD44W_Mosaic.sdat WMKMOD0a.tif -t_srs \"', crs, '\" -r
 unlink("wmask.tif")
 system(paste(gdalwarp, ' MOD44W_Mosaic.sdat wmask.tif -t_srs \"', crs, '\" -r bilinear -ot \"Byte\" -dstnodata 255 -te -180 -90 180 90 -tr ', 1,' ', 1, sep=""))
 
+## Africa only (250 m resolution):
+tif3.lst <- list.files(pattern=glob2rx("MOD44W_Water_2000_*.tif$"))
+tif3.lst <- tif3.lst[!(tif3.lst %in% tif2.lst)]
+unlink("my_liste_o.txt")
+cat(tif3.lst, file="my_liste_o.txt", sep = "\n")
+system(paste(gdalbuildvrt, "-input_file_list my_liste_o.txt MOD44W_o.vrt"))
+system(paste(gdalwarp, ' MOD44W_o.vrt af_WMKMOD5a.tif -r near -te -3977500 -4321500 3397500 3554500 -t_srs \"+proj=laea +lat_0=5 +lon_0=20 +x_0=0 +y_0=0 +units=m +ellps=WGS84 +datum=WGS84\" -tr 250 250', sep=""), show.output.on.console = TRUE) 
 
 ## Zip the output files:
 for(i in 0:3){
